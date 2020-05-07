@@ -1,0 +1,80 @@
+---
+layout: post
+title:  "FFmpeg命令行常用命令-宝剑锋从磨砺出"
+date:   2020-05-07 21:19:01 +0800
+categories: jekyll update
+---
+ffmpeg视频常用命令
+===
+
+
+1. 视频压缩
+
+```c
+ffmpeg -i input.mp4 -b:v 2000k -bufsize 2000k -maxrate 2500k output.mp4
+```
+
+
+2. 视频转动方向
+
+```c
+ffmpeg -i input.mp4 -vf "transpose=1" output.mp4
+
+0：逆时针旋转90度并垂直翻转，这是默认值。
+
+1：顺时针旋转90度。
+
+2：逆时针旋转90度。
+
+3：顺时针旋转90度并垂直翻转。
+
+```
+
+3. 音量增大
+
+```c
+ffmpeg -i input.wav -af "volume=2" output.wav
+```
+  - Replace volume=X with a suitable number. For example 0.5 will half, 2 will double the volume.
+
+4. 去除水印
+
+```c
+1. 查看文件信息ffmpeg -i xxx.mp4
+```
+
+5. 制作gif文件
+
+```c
+//从第2s开始截取10秒数据 -r 15 一秒15帧. 
+ffmpeg -ss 1 -t 10 -i 20200408.mp4 -s 360x640 -r 15 output2.gif
+```
+
+6. 播放 rtsp - tcp 流
+
+```c
+ffplay -rtsp_transport tcp rtsp://192.168.1.8:554/onvif1
+```
+
+7.  缩放图片
+
+```
+ffmpeg -i home.png -s 540x1200 hometiny.png
+
+```
+
+8. 视频转码 `flv -> mp4`
+
+```c
+ffmpeg -i flv.flv -vcodec copy out.mp4
+ffmpeg -i flv.flv -vcodec copy -acodec aac out.mp4
+ffmpeg -i out.ogv -vcodec h264 out.mp4
+ffmpeg -i input.flv -codec copy output.mp4
+高级
+ffmpeg -i flv.flv -c:v libx264 -crf 19 -strict experimental filename.mp4
+
+张瑞推荐参数:
+ffmpeg -i flv.flv -c:v copy -c:a aac -ab 128k -ar 44100 3.mp4
+
+```
+
