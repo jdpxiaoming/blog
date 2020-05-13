@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Gradle配置上传到Nexus私服2020教程 | poe Blog</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Gradle配置上传到Nexus私服2020教程" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Gradle配置上传到Nexus私服2020教程" />
+<meta property="og:description" content="Gradle配置上传到Nexus私服2020教程" />
+<link rel="canonical" href="http://localhost:4000/jekyll/update/2020/05/13/maven-nexus.html" />
+<meta property="og:url" content="http://localhost:4000/jekyll/update/2020/05/13/maven-nexus.html" />
+<meta property="og:site_name" content="poe Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-05-13T23:13:01+08:00" />
+<script type="application/ld+json">
+{"@type":"BlogPosting","url":"http://localhost:4000/jekyll/update/2020/05/13/maven-nexus.html","headline":"Gradle配置上传到Nexus私服2020教程","dateModified":"2020-05-13T23:13:01+08:00","datePublished":"2020-05-13T23:13:01+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/jekyll/update/2020/05/13/maven-nexus.html"},"description":"Gradle配置上传到Nexus私服2020教程","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="poe Blog" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">poe Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Gradle配置上传到Nexus私服2020教程</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2020-05-13T23:13:01+08:00" itemprop="datePublished">May 13, 2020
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h1 id="gradle配置上传到nexus私服2020教程">Gradle配置上传到Nexus私服2020教程</h1>
+
+<h2 id="2020配置ijkplayer上传到私有nexus服务器">2020配置Ijkplayer上传到私有Nexus服务器。</h2>
+
+<h4 id="1-在根目录build配置增加一下maven和bintray">1. 在根目录build配置增加一下maven和bintray</h4>
+<div class="language-groovy highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="n">dependencies</span> <span class="o">{</span>
+        <span class="n">classpath</span> <span class="s1">'com.android.tools.build:gradle:3.4.2'</span>
+        <span class="err">#需要上传的仓库信息</span><span class="o">.</span> 
+        <span class="n">classpath</span> <span class="s1">'com.github.dcendents:android-maven-gradle-plugin:1.4.1'</span>
+        <span class="n">classpath</span> <span class="s1">'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7'</span>
+    <span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="2-编写账户和独立信息放到根目录的gradleproperties">2. 编写账户和独立信息放到根目录的gradle.properties</h3>
+<div class="language-groovy highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">#</span> <span class="n">nexus</span><span class="err">对应的</span><span class="n">Maven</span><span class="err">配置</span><span class="o">.</span>
+<span class="n">RELEASE_REPOSITORY_URL</span><span class="o">=</span><span class="nl">http:</span><span class="c1">//172.16.22.18:8081/repository/android/</span>
+<span class="err">#</span> <span class="err">这里我的私有仓库只有</span><span class="n">release</span><span class="err">仓库，没有建</span><span class="n">snapshot</span><span class="err">和</span><span class="n">release</span><span class="err">的</span><span class="n">host</span><span class="err">仓库</span><span class="o">,</span><span class="err">有兴趣可以自行添加</span><span class="o">.</span> 
+<span class="n">SNAPSHOT_REPOSITORY_URL</span><span class="o">=</span><span class="nl">http:</span><span class="c1">//172.16.22.18:8081/repository/android/</span>
+<span class="n">NEXUS_USERNAME</span><span class="o">=</span><span class="n">android</span>
+<span class="n">NEXUS_PASSWORD</span><span class="o">=</span><span class="n">android</span>
+
+</code></pre></div></div>
+
+<h3 id="3-在需要的module下的gradleproperties中添加lib的相关信息">3. 在需要的module下的<code class="language-plaintext highlighter-rouge">gradle.properties</code>中添加lib的相关信息</h3>
+<div class="language-groovy highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">POM_NAME</span><span class="o">=</span><span class="n">ijkplayer</span><span class="o">-</span><span class="n">java</span>
+<span class="n">POM_ARTIFACT_ID</span><span class="o">=</span><span class="n">ijkplayer</span><span class="o">-</span><span class="n">java</span>
+<span class="n">POM_PACKAGING</span><span class="o">=</span><span class="n">aar</span>
+</code></pre></div></div>
+
+<h3 id="4-在根目录新建toolsgradle-mvn-pushgradle">4. 在根目录新建tools/gradle-mvn-push.gradle</h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- tools
+  - gradle-mvn-push.gradle
+  - gradle-bintray-upload.gradle
+  - gradle-on-demand.gradle
+</code></pre></div></div>
+
+<ul>
+  <li>gradle-on-demand.gradle</li>
+</ul>
+
+<div class="language-groovy highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="cm">/*
+ * Copyright 2016 Zhang Rui &lt;bbcallen@gmail.com&gt;
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */</span>
+
+<span class="n">gradle</span><span class="o">.</span><span class="na">startParameter</span><span class="o">.</span><span class="na">taskNames</span><span class="o">.</span><span class="na">each</span> <span class="o">{</span> <span class="n">task</span> <span class="o">-&gt;</span>
+    <span class="kt">def</span> <span class="n">taskName</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="na">split</span><span class="o">(</span><span class="s2">":"</span><span class="o">).</span><span class="na">last</span><span class="o">()</span>
+    <span class="k">switch</span> <span class="o">(</span><span class="n">taskName</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">case</span> <span class="s2">"uploadArchives"</span><span class="o">:</span>
+            <span class="n">apply</span> <span class="nl">from:</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">rootProject</span><span class="o">.</span><span class="na">projectDir</span><span class="o">,</span> <span class="s1">'tools/gradle-mvn-push.gradle'</span><span class="o">)</span>
+            <span class="k">break</span><span class="o">;</span>
+        <span class="k">case</span> <span class="s2">"bintrayUpload"</span><span class="o">:</span>
+            <span class="n">apply</span> <span class="nl">from:</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">rootProject</span><span class="o">.</span><span class="na">projectDir</span><span class="o">,</span> <span class="s1">'tools/gradle-bintray-upload.gradle'</span><span class="o">)</span>
+            <span class="k">break</span><span class="o">;</span>
+        <span class="nl">default:</span>
+            <span class="c1">// do nothing</span>
+            <span class="k">break</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>gradle-mvn-push.gradle</li>
+</ul>
+
+<div class="language-groovy highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+ * Copyright 2013 Chris Banes
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */</span>
+
+<span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">'maven'</span>
+<span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">'signing'</span>
+
+<span class="kt">def</span> <span class="nf">isReleaseBuild</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">VERSION_NAME</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="s2">"SNAPSHOT"</span><span class="o">)</span> <span class="o">==</span> <span class="kc">false</span>
+<span class="o">}</span>
+
+<span class="kt">def</span> <span class="nf">getReleaseRepositoryUrl</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="nf">hasProperty</span><span class="o">(</span><span class="s1">'RELEASE_REPOSITORY_URL'</span><span class="o">)</span> <span class="o">?</span> <span class="n">RELEASE_REPOSITORY_URL</span>
+            <span class="o">:</span> <span class="s2">"https://oss.sonatype.org/service/local/staging/deploy/maven2/"</span>
+<span class="o">}</span>
+
+<span class="kt">def</span> <span class="nf">getSnapshotRepositoryUrl</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="nf">hasProperty</span><span class="o">(</span><span class="s1">'SNAPSHOT_REPOSITORY_URL'</span><span class="o">)</span> <span class="o">?</span> <span class="n">SNAPSHOT_REPOSITORY_URL</span>
+            <span class="o">:</span> <span class="s2">"https://oss.sonatype.org/content/repositories/snapshots/"</span>
+<span class="o">}</span>
+
+<span class="kt">def</span> <span class="nf">getRepositoryUsername</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="nf">hasProperty</span><span class="o">(</span><span class="s1">'NEXUS_USERNAME'</span><span class="o">)</span> <span class="o">?</span> <span class="n">NEXUS_USERNAME</span> <span class="o">:</span> <span class="s2">""</span>
+<span class="o">}</span>
+
+<span class="kt">def</span> <span class="nf">getRepositoryPassword</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="nf">hasProperty</span><span class="o">(</span><span class="s1">'NEXUS_PASSWORD'</span><span class="o">)</span> <span class="o">?</span> <span class="n">NEXUS_PASSWORD</span> <span class="o">:</span> <span class="s2">""</span>
+<span class="o">}</span>
+
+<span class="n">afterEvaluate</span> <span class="o">{</span> <span class="n">project</span> <span class="o">-&gt;</span>
+    <span class="n">uploadArchives</span> <span class="o">{</span>
+        <span class="n">repositories</span> <span class="o">{</span>
+            <span class="n">mavenDeployer</span> <span class="o">{</span>
+                <span class="n">beforeDeployment</span> <span class="o">{</span> <span class="n">MavenDeployment</span> <span class="n">deployment</span> <span class="o">-&gt;</span> <span class="n">signing</span><span class="o">.</span><span class="na">signPom</span><span class="o">(</span><span class="n">deployment</span><span class="o">)</span> <span class="o">}</span>
+
+                <span class="n">pom</span><span class="o">.</span><span class="na">groupId</span> <span class="o">=</span> <span class="n">GROUP</span>
+                <span class="n">pom</span><span class="o">.</span><span class="na">artifactId</span> <span class="o">=</span> <span class="n">POM_ARTIFACT_ID</span>
+                <span class="n">pom</span><span class="o">.</span><span class="na">version</span> <span class="o">=</span> <span class="n">VERSION_NAME</span>
+
+                <span class="n">repository</span><span class="o">(</span><span class="nl">url:</span> <span class="n">getReleaseRepositoryUrl</span><span class="o">())</span> <span class="o">{</span>
+                    <span class="n">authentication</span><span class="o">(</span><span class="nl">userName:</span> <span class="n">getRepositoryUsername</span><span class="o">(),</span> <span class="nl">password:</span> <span class="n">getRepositoryPassword</span><span class="o">())</span>
+                <span class="o">}</span>
+                <span class="n">snapshotRepository</span><span class="o">(</span><span class="nl">url:</span> <span class="n">getSnapshotRepositoryUrl</span><span class="o">())</span> <span class="o">{</span>
+                    <span class="n">authentication</span><span class="o">(</span><span class="nl">userName:</span> <span class="n">getRepositoryUsername</span><span class="o">(),</span> <span class="nl">password:</span> <span class="n">getRepositoryPassword</span><span class="o">())</span>
+                <span class="o">}</span>
+
+                <span class="n">pom</span><span class="o">.</span><span class="na">project</span> <span class="o">{</span>
+                    <span class="n">name</span> <span class="n">POM_NAME</span>
+                    <span class="n">packaging</span> <span class="n">POM_PACKAGING</span>
+                    <span class="n">description</span> <span class="n">POM_DESCRIPTION</span>
+                    <span class="n">url</span> <span class="n">POM_URL</span>
+
+                    <span class="n">licenses</span> <span class="o">{</span>
+                        <span class="n">license</span> <span class="o">{</span>
+                            <span class="n">name</span> <span class="n">POM_LICENSE_NAME</span>
+                            <span class="n">url</span> <span class="n">POM_LICENSE_URL</span>
+                            <span class="n">distribution</span> <span class="n">POM_LICENSE_DIST</span>
+                        <span class="o">}</span>
+                    <span class="o">}</span>
+
+                    <span class="n">scm</span> <span class="o">{</span>
+                        <span class="n">url</span> <span class="n">POM_SCM_URL</span>
+                        <span class="n">connection</span> <span class="n">POM_SCM_CONNECTION</span>
+                        <span class="n">developerConnection</span> <span class="n">POM_SCM_DEV_CONNECTION</span>
+                    <span class="o">}</span>
+
+                    <span class="n">developers</span> <span class="o">{</span>
+                        <span class="n">developer</span> <span class="o">{</span>
+                            <span class="n">id</span> <span class="n">POM_DEVELOPER_ID</span>
+                            <span class="n">name</span> <span class="n">POM_DEVELOPER_NAME</span>
+                            <span class="n">email</span> <span class="n">POM_DEVELOPER_EMAIL</span>
+                        <span class="o">}</span>
+                    <span class="o">}</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="n">android</span><span class="o">.</span><span class="na">libraryVariants</span><span class="o">.</span><span class="na">all</span> <span class="o">{</span> <span class="n">variant</span> <span class="o">-&gt;</span>
+        <span class="k">if</span><span class="o">(</span><span class="n">variant</span><span class="o">.</span><span class="na">buildType</span><span class="o">.</span><span class="na">name</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="s2">"release"</span><span class="o">))</span> <span class="o">{</span>
+            <span class="kt">def</span> <span class="n">jarTask</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="na">tasks</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="nl">name:</span> <span class="s2">"jar${variant.name.capitalize()}"</span><span class="o">,</span> <span class="nl">type:</span> <span class="n">Jar</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">from</span> <span class="n">variant</span><span class="o">.</span><span class="na">javaCompile</span><span class="o">.</span><span class="na">destinationDir</span>
+                <span class="n">exclude</span> <span class="s2">"**/R.class"</span>
+                <span class="n">exclude</span> <span class="s2">"**/R\$**.class"</span>
+                <span class="n">exclude</span> <span class="s2">"**/BuildConfig.class"</span>
+            <span class="o">}</span>
+            <span class="n">jarTask</span><span class="o">.</span><span class="na">dependsOn</span> <span class="n">variant</span><span class="o">.</span><span class="na">javaCompile</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="n">signing</span> <span class="o">{</span>
+        <span class="n">required</span> <span class="o">{</span> <span class="n">isReleaseBuild</span><span class="o">()</span> <span class="o">&amp;&amp;</span> <span class="n">gradle</span><span class="o">.</span><span class="na">taskGraph</span><span class="o">.</span><span class="na">hasTask</span><span class="o">(</span><span class="s2">"uploadArchives"</span><span class="o">)</span> <span class="o">}</span>
+        <span class="n">sign</span> <span class="n">configurations</span><span class="o">.</span><span class="na">archives</span>
+    <span class="o">}</span>
+
+    <span class="n">task</span> <span class="nf">androidJavadocs</span><span class="o">(</span><span class="nl">type:</span> <span class="n">Javadoc</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">failOnError</span> <span class="kc">false</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">android</span><span class="o">.</span><span class="na">sourceSets</span><span class="o">.</span><span class="na">main</span><span class="o">.</span><span class="na">java</span><span class="o">.</span><span class="na">srcDirs</span>
+        <span class="n">classpath</span> <span class="o">+=</span> <span class="n">project</span><span class="o">.</span><span class="na">files</span><span class="o">(</span><span class="n">android</span><span class="o">.</span><span class="na">getBootClasspath</span><span class="o">().</span><span class="na">join</span><span class="o">(</span><span class="n">File</span><span class="o">.</span><span class="na">pathSeparator</span><span class="o">))</span>
+    <span class="o">}</span>
+
+    <span class="n">task</span> <span class="nf">androidJavadocsJar</span><span class="o">(</span><span class="nl">type:</span> <span class="n">Jar</span><span class="o">,</span> <span class="nl">dependsOn:</span> <span class="n">androidJavadocs</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">classifier</span> <span class="o">=</span> <span class="s1">'javadoc'</span>
+        <span class="n">from</span> <span class="n">androidJavadocs</span><span class="o">.</span><span class="na">destinationDir</span>
+    <span class="o">}</span>
+
+    <span class="n">task</span> <span class="nf">androidSourcesJar</span><span class="o">(</span><span class="nl">type:</span> <span class="n">Jar</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">classifier</span> <span class="o">=</span> <span class="s1">'sources'</span>
+        <span class="n">from</span> <span class="n">android</span><span class="o">.</span><span class="na">sourceSets</span><span class="o">.</span><span class="na">main</span><span class="o">.</span><span class="na">java</span><span class="o">.</span><span class="na">sourceFiles</span>
+    <span class="o">}</span>
+
+    <span class="n">artifacts</span> <span class="o">{</span>
+        <span class="n">archives</span> <span class="n">androidSourcesJar</span>
+        <span class="n">archives</span> <span class="n">androidJavadocsJar</span>
+        <span class="n">archives</span> <span class="n">jarRelease</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>gradle-bintray-upload.gradle</li>
+</ul>
+
+<div class="language-groovy highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+ * Copyright 2015 Zhang Rui &lt;bbcallen@gmail.com&gt;
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */</span>
+
+<span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">'com.github.dcendents.android-maven'</span>
+<span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">'com.jfrog.bintray'</span>
+
+<span class="n">group</span> <span class="o">=</span> <span class="n">GROUP</span>
+<span class="n">version</span> <span class="o">=</span> <span class="n">VERSION_NAME</span>
+
+<span class="n">bintray</span> <span class="o">{</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="na">hasProperty</span><span class="o">(</span><span class="s1">'BINTRAY_USER'</span><span class="o">)</span> <span class="o">?</span> <span class="n">BINTRAY_USER</span> <span class="o">:</span> <span class="n">System</span><span class="o">.</span><span class="na">getenv</span><span class="o">(</span><span class="s1">'BINTRAY_USER'</span><span class="o">)</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="na">hasProperty</span><span class="o">(</span><span class="s1">'BINTRAY_APIKEY'</span><span class="o">)</span> <span class="o">?</span> <span class="n">BINTRAY_APIKEY</span> <span class="o">:</span> <span class="n">System</span><span class="o">.</span><span class="na">getenv</span><span class="o">(</span><span class="s1">'BINTRAY_APIKEY'</span><span class="o">)</span>
+
+    <span class="n">configurations</span> <span class="o">=</span> <span class="o">[</span><span class="s1">'archives'</span><span class="o">]</span>
+
+    <span class="n">dryRun</span> <span class="o">=</span> <span class="kc">false</span>
+    <span class="n">publish</span> <span class="o">=</span> <span class="kc">true</span>
+
+    <span class="n">pkg</span> <span class="o">{</span>
+        <span class="n">repo</span> <span class="o">=</span> <span class="s1">'maven'</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">POM_NAME</span>
+        <span class="n">userOrg</span> <span class="o">=</span> <span class="n">POM_USER_ORG</span>
+        <span class="n">desc</span> <span class="o">=</span> <span class="n">POM_DESCRIPTION</span>
+        <span class="n">websiteUrl</span> <span class="o">=</span> <span class="n">POM_URL</span>
+        <span class="n">vcsUrl</span> <span class="o">=</span> <span class="n">POM_SCM_URL</span>
+        <span class="n">licenses</span> <span class="o">=</span> <span class="o">[</span><span class="n">POM_LICENSE_NAME</span><span class="o">]</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="o">[</span><span class="s1">'FFmpeg'</span><span class="o">,</span> <span class="s1">'Android'</span><span class="o">,</span> <span class="s1">'player'</span><span class="o">]</span>
+        <span class="n">publicDownloadNumbers</span> <span class="o">=</span> <span class="kc">true</span>
+        <span class="n">version</span> <span class="o">{</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">VERSION_NAME</span>
+            <span class="n">gpg</span> <span class="o">{</span>
+                <span class="n">sign</span> <span class="o">=</span> <span class="kc">true</span>
+                <span class="n">passphrase</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="na">hasProperty</span><span class="o">(</span><span class="s1">'GPG_PASSWORD'</span><span class="o">)</span> <span class="o">?</span> <span class="n">GPG_PASSWORD</span> <span class="o">:</span> <span class="n">System</span><span class="o">.</span><span class="na">getenv</span><span class="o">(</span><span class="s1">'GPG_PASSWORD'</span><span class="o">)</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="n">install</span> <span class="o">{</span>
+    <span class="n">repositories</span><span class="o">.</span><span class="na">mavenInstaller</span> <span class="o">{</span>
+        <span class="n">pom</span><span class="o">.</span><span class="na">project</span> <span class="o">{</span>
+            <span class="n">name</span> <span class="n">POM_NAME</span>
+            <span class="n">packaging</span> <span class="n">POM_PACKAGING</span>
+            <span class="n">description</span> <span class="n">POM_DESCRIPTION</span>
+            <span class="n">url</span> <span class="n">POM_URL</span>
+
+            <span class="n">licenses</span> <span class="o">{</span>
+                <span class="n">license</span> <span class="o">{</span>
+                    <span class="n">name</span> <span class="n">POM_LICENSE_NAME</span>
+                    <span class="n">url</span> <span class="n">POM_LICENSE_URL</span>
+                    <span class="n">distribution</span> <span class="n">POM_LICENSE_DIST</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+
+            <span class="n">scm</span> <span class="o">{</span>
+                <span class="n">url</span> <span class="n">POM_SCM_URL</span>
+                <span class="n">connection</span> <span class="n">POM_SCM_CONNECTION</span>
+                <span class="n">developerConnection</span> <span class="n">POM_SCM_DEV_CONNECTION</span>
+            <span class="o">}</span>
+
+            <span class="n">developers</span> <span class="o">{</span>
+                <span class="n">developer</span> <span class="o">{</span>
+                    <span class="n">id</span> <span class="n">POM_DEVELOPER_ID</span>
+                    <span class="n">name</span> <span class="n">POM_DEVELOPER_NAME</span>
+                    <span class="n">email</span> <span class="n">POM_DEVELOPER_EMAIL</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="5-在各自module的buildgradle里面新建任务和配置maven信息引入">5. 在各自module的build.gradle里面新建任务和配置maven信息引入</h3>
+<div class="language-groovy highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//新建一个任务，这里只需要定义名字，下面的配置文件中会自动获取相关配置信息. </span>
+<span class="n">uploadArchives</span> <span class="o">{</span>
+
+<span class="o">}</span>
+<span class="n">apply</span> <span class="nl">from:</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">rootProject</span><span class="o">.</span><span class="na">projectDir</span><span class="o">,</span> <span class="s2">"tools/gradle-on-demand.gradle"</span><span class="o">);</span>
+
+</code></pre></div></div>
+
+<h3 id="6-在右侧的gradle脚本里面找到uploaduploadarchives双击上传">6. 在右侧的Gradle脚本里面找到<code class="language-plaintext highlighter-rouge">upload/uploadArchives</code>双击上传</h3>
+
+<h3 id="7-查看nexus的库是否上传成功了">7. 查看nexus的库是否上传成功了.</h3>
+<p><img src="/assets/blog_res/861d7570.png" alt="861d7570.png" /></p>
+
+<h3 id="8--多模块互相依赖注意事项">8 . 多模块互相依赖注意事项</h3>
+<ul>
+  <li>先分别上传其他单独module ex:ijk-java/ijk-armv7a</li>
+  <li>最后上传ijk-demo/项目中以来改为地址依赖(方便pom记录以来信息)</li>
+</ul>
+
+<h2 id="最后的最后还是翻车了so没有上传上去只有java代码上去了aar上传搞定">最后的最后还是翻车了，so没有上传上去只有java代码上去了.aar上传搞定.</h2>
+<ul>
+  <li>其实是刷新问题，等一会刷新下页面就能看到aar的信息了，直接引用@aar即可</li>
+</ul>
+
+<blockquote>
+  <p>上绝招了：直接到module/build/output/aar/xxx.aar拷贝上传到nexus
+Classifier不用填其他照着配置填好,点击上传即可</p>
+</blockquote>
+
+<p><img src="/assets/blog_res/d8467fa0.png" alt="d8467fa0.png" /></p>
+
+<ul>
+  <li>引用的时候在包名后面添加<code class="language-plaintext highlighter-rouge">xxx@aar</code>
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>implementation 'tv.danmaku.ijk.media:ijkplayer-arm64:0.8.8@aar'
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<p>总结：没有lib/xx.so的module使用gradle一键上传jar包即可，如果是
+有so库要上传的需要手动上传module.aar即可。</p>
+
+<h3 id="等待探求问题">等待探求问题</h3>
+<ul>
+  <li>有一个奇怪的现象，我上传ijkplayerview的时候用的也是脚本命令，却自动给我上传了aar文件.
+初步猜测是因为womodulize里面配置了service和一些string资源.</li>
+</ul>
+
+  </div><a class="u-url" href="/jekyll/update/2020/05/13/maven-nexus.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">poe Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">poe Blog</li><li><a class="u-email" href="mailto:302940116@qq.com">302940116@qq.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">jdpxiaoming</span></a></li><li><a href="https://www.twitter.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">jdpxiaoming</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>不积跬步无以至千里，先从一篇blog出发， 归纳总结出一个多媒体安卓工程师的技术轨迹。</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
