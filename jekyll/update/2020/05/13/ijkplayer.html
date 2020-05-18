@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Android新播放器Ijkplayer集成教程 | poe Blog</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Android新播放器Ijkplayer集成教程" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Android新播放器Ijkplayer集成教程" />
+<meta property="og:description" content="Android新播放器Ijkplayer集成教程" />
+<link rel="canonical" href="http://localhost:4000/jekyll/update/2020/05/13/ijkplayer.html" />
+<meta property="og:url" content="http://localhost:4000/jekyll/update/2020/05/13/ijkplayer.html" />
+<meta property="og:site_name" content="poe Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-05-13T23:10:01+08:00" />
+<script type="application/ld+json">
+{"@type":"BlogPosting","url":"http://localhost:4000/jekyll/update/2020/05/13/ijkplayer.html","headline":"Android新播放器Ijkplayer集成教程","dateModified":"2020-05-13T23:10:01+08:00","datePublished":"2020-05-13T23:10:01+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/jekyll/update/2020/05/13/ijkplayer.html"},"description":"Android新播放器Ijkplayer集成教程","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="poe Blog" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">poe Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Android新播放器Ijkplayer集成教程</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2020-05-13T23:10:01+08:00" itemprop="datePublished">May 13, 2020
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h1 id="android新播放器ijkplayer集成教程">Android新播放器Ijkplayer集成教程</h1>
+
+<h3 id="ijk编译环境信息">ijk编译环境信息</h3>
+<ul>
+  <li>Ijkplayer-0.8.8</li>
+  <li>支持rtsp</li>
+  <li>支持http</li>
+  <li>支持hls</li>
+  <li>支持rtmp</li>
+  <li>支持h265</li>
+  <li>支持arm64/armv7a</li>
+</ul>
+
+<h2 id="1-引入私有库地址">1. 引入私有库地址.</h2>
+<div class="language-groovy highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="n">repositories</span> <span class="o">{</span>
+        <span class="n">maven</span> <span class="o">{</span>
+            <span class="n">url</span> <span class="s1">'http://172.16.22.18:8081/repository/maven-public/'</span>
+        <span class="o">}</span>
+        <span class="o">...</span>
+    <span class="o">}</span>
+
+</code></pre></div></div>
+
+<h2 id="2-在主项目中buildgradle引入以下库">2. 在主项目中build.gradle引入以下库</h2>
+<div class="language-groovy highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">implementation</span> <span class="s1">'tv.danmaku.ijk.media:ijkplayer-view:0.8.8@aar'</span>
+    <span class="n">implementation</span> <span class="s1">'tv.danmaku.ijk.media:ijkplayer-java:0.8.8'</span>
+    <span class="n">implementation</span> <span class="s1">'tv.danmaku.ijk.media:ijkplayer-armv7a:0.8.8@aar'</span>
+    <span class="c1">//看情况如果需要64位so则引入. </span>
+    <span class="n">implementation</span> <span class="s1">'tv.danmaku.ijk.media:ijkplayer-arm64:0.8.8@aar'</span>
+
+</code></pre></div></div>
+
+<h3 id="3-xml引入播放器view">3. xml引入播放器view</h3>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="o">&lt;</span><span class="n">tv</span><span class="o">.</span><span class="na">danmaku</span><span class="o">.</span><span class="na">ijk</span><span class="o">.</span><span class="na">media</span><span class="o">.</span><span class="na">ijkplayerview</span><span class="o">.</span><span class="na">widget</span><span class="o">.</span><span class="na">media</span><span class="o">.</span><span class="na">IjkVideoView</span>
+            <span class="nl">android:</span><span class="n">id</span><span class="o">=</span><span class="s">"@+id/video_view"</span>
+            <span class="nl">android:</span><span class="n">layout_width</span><span class="o">=</span><span class="s">"match_parent"</span>
+            <span class="nl">android:</span><span class="n">layout_height</span><span class="o">=</span><span class="s">"match_parent"</span>
+            <span class="nl">android:</span><span class="n">layout_gravity</span><span class="o">=</span><span class="s">"center"</span>
+            <span class="o">/&gt;</span>
+</code></pre></div></div>
+
+<h3 id="4-设置路径和播放类型">4. 设置路径和播放类型</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// init player</span>
+<span class="nc">IjkMediaPlayer</span><span class="o">.</span><span class="na">loadLibrariesOnce</span><span class="o">(</span><span class="kc">null</span><span class="o">);</span>
+<span class="nc">IjkMediaPlayer</span><span class="o">.</span><span class="na">native_profileBegin</span><span class="o">(</span><span class="s">"libijkplayer.so"</span><span class="o">);</span>
+
+<span class="n">mVideoView</span><span class="o">.</span><span class="na">setVideoPath</span><span class="o">(</span><span class="n">mVideoPath</span><span class="o">,</span> <span class="nc">IjkVideoView</span><span class="o">.</span><span class="na">IJK_TYPE_HTTP_PLAY</span><span class="o">);</span>
+</code></pre></div></div>
+
+<ul>
+  <li>可供选择的url类型</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">###</span> <span class="err">根据播放地址类型设置不同的类型</span> <span class="o">.</span>
+
+<span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="no">IJK_TYPE_LIVING_WATCH</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span> <span class="c1">//实时监控，要求首开速度,延迟略高一点</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="no">IJK_TYPE_LIVING_LOW_DELAY</span> <span class="o">=</span> <span class="mi">2</span><span class="o">;</span> <span class="c1">//实时直播要求低延迟，不要求首开熟读 .</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="no">IJK_TYPE_HTTP_PLAY</span> <span class="o">=</span> <span class="mi">3</span><span class="o">;</span><span class="c1">//录播 mp4 /hls/flv...</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="no">IJK_TYPE_FILE_PLAY</span> <span class="o">=</span> <span class="mi">10</span><span class="o">;</span><span class="c1">//本地文件播放 .</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="no">IJK_TYPE_PLAY_DEFAULT</span> <span class="o">=</span> <span class="no">IJK_TYPE_LIVING_WATCH</span><span class="o">;</span><span class="c1">//默认播放类型.</span>
+</code></pre></div></div>
+
+<h3 id="5-停止播放销毁">5. 停止播放，销毁</h3>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nd">@Override</span>
+<span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onStop</span><span class="o">()</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">.</span><span class="na">onStop</span><span class="o">();</span>
+        <span class="nc">Log</span><span class="o">.</span><span class="na">i</span><span class="o">(</span><span class="s">"poe"</span><span class="o">,</span><span class="s">"onStop()"</span><span class="o">);</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">mBackPressed</span> <span class="o">||</span> <span class="o">!</span><span class="n">mVideoView</span><span class="o">.</span><span class="na">isBackgroundPlayEnabled</span><span class="o">())</span> <span class="o">{</span>
+            <span class="n">mVideoView</span><span class="o">.</span><span class="na">stopPlayback</span><span class="o">();</span>
+            <span class="n">mVideoView</span><span class="o">.</span><span class="na">release</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+            <span class="n">mVideoView</span><span class="o">.</span><span class="na">stopBackgroundPlay</span><span class="o">();</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+            <span class="n">mVideoView</span><span class="o">.</span><span class="na">enterBackground</span><span class="o">();</span>
+        <span class="o">}</span>
+        <span class="nc">IjkMediaPlayer</span><span class="o">.</span><span class="na">native_profileEnd</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>想知道ijkplayer是如何编译的吗，下篇文章我们来聊聊 如何编译你的ijkplayer打开rtsp开关、h265、pcma等编码支持，敬请期待！</li>
+</ul>
+
+  </div><a class="u-url" href="/jekyll/update/2020/05/13/ijkplayer.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">poe Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">poe Blog</li><li><a class="u-email" href="mailto:302940116@qq.com">302940116@qq.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">jdpxiaoming</span></a></li><li><a href="https://www.twitter.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">jdpxiaoming</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>不积跬步无以至千里，先从一篇blog出发， 归纳总结出一个多媒体安卓工程师的技术轨迹。</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

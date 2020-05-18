@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Android调用FFmpeg4.0.2的main方法 | poe Blog</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Android调用FFmpeg4.0.2的main方法" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Android调用FFmpeg4.0.2的main方法" />
+<meta property="og:description" content="Android调用FFmpeg4.0.2的main方法" />
+<link rel="canonical" href="http://localhost:4000/jekyll/update/2020/05/18/ffmpeg-android.html" />
+<meta property="og:url" content="http://localhost:4000/jekyll/update/2020/05/18/ffmpeg-android.html" />
+<meta property="og:site_name" content="poe Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-05-18T17:50:01+08:00" />
+<script type="application/ld+json">
+{"@type":"BlogPosting","url":"http://localhost:4000/jekyll/update/2020/05/18/ffmpeg-android.html","headline":"Android调用FFmpeg4.0.2的main方法","dateModified":"2020-05-18T17:50:01+08:00","datePublished":"2020-05-18T17:50:01+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/jekyll/update/2020/05/18/ffmpeg-android.html"},"description":"Android调用FFmpeg4.0.2的main方法","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="poe Blog" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">poe Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Android调用FFmpeg4.0.2的main方法</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2020-05-18T17:50:01+08:00" itemprop="datePublished">May 18, 2020
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h1 id="android调用ffmpeg402的main方法">Android调用FFmpeg4.0.2的main方法</h1>
+
+<h2 id="1-将上一章中我们编译的单个so或者多个so或者静态xxa都行拷贝到">1. 将上一章中我们编译的单个so（或者多个so或者静态xx.a都行）拷贝到</h2>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-app
+----libs
+--------armeabi-v7a/libffmpeg.so
+</code></pre></div></div>
+
+<h2 id="2-拷贝include到srcmaincpp下">2. 拷贝include到<code class="language-plaintext highlighter-rouge">src/main/cpp下</code></h2>
+<ul>
+  <li>拷贝编译文件下的<code class="language-plaintext highlighter-rouge">include/libav***</code>`</li>
+</ul>
+
+<p><img src="https://xucanhui.com/2018/10/26/android-invoke-ffmpeg-cmd/header.png" alt="header.png" /></p>
+
+<ul>
+  <li>新建<code class="language-plaintext highlighter-rouge">cpp/ffmpeg</code></li>
+  <li>拷贝FFmpeg4.0.2源码的fftools文件（<code class="language-plaintext highlighter-rouge">cmdutils.h.c/ffmpeg.c/ffmpeg.h/ffmpeg_filter.c/ffmpeg_opt.c</code>）
+<img src="https://xucanhui.com/2018/10/26/android-invoke-ffmpeg-cmd/ffmpeg-source.png" alt="ffmpeg-source.png" /></li>
+  <li>拷贝编译后跟目录下的<code class="language-plaintext highlighter-rouge">config.h</code>到ffmpeg下</li>
+</ul>
+
+<h2 id="3-native-libcpp改为ffmpeg_cmdc">3. <code class="language-plaintext highlighter-rouge">native-lib.cpp</code>改为<code class="language-plaintext highlighter-rouge">ffmpeg_cmd.c</code></h2>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">JNIEXPORT</span> <span class="n">jint</span> <span class="n">JNICALL</span>
+<span class="nf">Java_com_example_ffmpegtools_MainActivity_exec</span><span class="p">(</span><span class="n">JNIEnv</span> <span class="o">*</span><span class="n">env</span><span class="p">,</span> <span class="n">jclass</span> <span class="n">clazz</span><span class="p">,</span> <span class="n">jint</span> <span class="n">cmdnum</span><span class="p">,</span> <span class="n">jobjectArray</span> <span class="n">cmdline</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="p">(</span><span class="o">*</span><span class="n">env</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">GetJavaVM</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">jvm</span><span class="p">);</span>
+    <span class="n">m_clazz</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">env</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">NewGlobalRef</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">clazz</span><span class="p">);</span>
+    <span class="c1">//---------------------------------C语言 反射Java 相关----------------------------------------</span>
+    <span class="c1">//---------------------------------java 数组转C语言数组----------------------------------------</span>
+    <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span><span class="c1">//满足NDK所需的C99标准</span>
+    <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span><span class="c1">//命令集 二维指针</span>
+    <span class="n">jstring</span> <span class="o">*</span><span class="n">strr</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">cmdline</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">argv</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">**</span><span class="p">)</span> <span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span> <span class="o">*</span> <span class="n">cmdnum</span><span class="p">);</span>
+        <span class="n">strr</span> <span class="o">=</span> <span class="p">(</span><span class="n">jstring</span> <span class="o">*</span><span class="p">)</span> <span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">jstring</span><span class="p">)</span> <span class="o">*</span> <span class="n">cmdnum</span><span class="p">);</span>
+
+        <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">cmdnum</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span><span class="c1">//转换</span>
+            <span class="n">strr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">jstring</span><span class="p">)(</span><span class="o">*</span><span class="n">env</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">GetObjectArrayElement</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">cmdline</span><span class="p">,</span> <span class="n">i</span><span class="p">);</span>
+            <span class="n">argv</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span><span class="n">env</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">GetStringUTFChars</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">strr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">0</span><span class="p">);</span>
+        <span class="p">}</span>
+
+    <span class="p">}</span>
+    <span class="c1">//---------------------------------java 数组转C语言数组----------------------------------------</span>
+    <span class="c1">//---------------------------------执行FFmpeg命令相关----------------------------------------</span>
+    <span class="c1">//新建线程 执行ffmpeg 命令</span>
+    <span class="n">ffmpeg_thread_run_cmd</span><span class="p">(</span><span class="n">cmdnum</span><span class="p">,</span> <span class="n">argv</span><span class="p">);</span>
+    <span class="c1">//注册ffmpeg命令执行完毕时的回调</span>
+    <span class="n">ffmpeg_thread_callback</span><span class="p">(</span><span class="n">ffmpeg_callback</span><span class="p">);</span>
+
+    <span class="n">free</span><span class="p">(</span><span class="n">strr</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+</code></pre></div></div>
+
+<h2 id="4-修改cmakeliststxt">4. 修改<code class="language-plaintext highlighter-rouge">CMakeLists.txt</code></h2>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cmake_minimum_required<span class="o">(</span>VERSION 3.4.1<span class="o">)</span>
+file<span class="o">(</span>GLOB SOURCE <span class="k">${</span><span class="nv">CMAKE_SOURCE_DIR</span><span class="k">}</span>/<span class="k">*</span>.c <span class="k">${</span><span class="nv">CMAKE_SOURCE_DIR</span><span class="k">}</span>/<span class="k">*</span>.h<span class="o">)</span>
+<span class="c">#add_library(native-lib</span>
+<span class="c">#             SHARED</span>
+<span class="c">#             native-lib.cpp</span>
+<span class="c">#             )</span>
+
+add_library<span class="o">(</span> <span class="c"># Sets the name of the library.</span>
+        ffmpeg-cmd
+        <span class="c"># Sets the library as a shared library.</span>
+        SHARED
+        <span class="c"># Provides a relative path to your source file(s).</span>
+        <span class="k">${</span><span class="nv">CMAKE_SOURCE_DIR</span><span class="k">}</span>/ffmpeg/cmdutils.c
+        <span class="k">${</span><span class="nv">CMAKE_SOURCE_DIR</span><span class="k">}</span>/ffmpeg/ffmpeg.c
+        <span class="k">${</span><span class="nv">CMAKE_SOURCE_DIR</span><span class="k">}</span>/ffmpeg/ffmpeg_filter.c
+        <span class="k">${</span><span class="nv">CMAKE_SOURCE_DIR</span><span class="k">}</span>/ffmpeg/ffmpeg_opt.c
+        <span class="k">${</span><span class="nv">CMAKE_SOURCE_DIR</span><span class="k">}</span>/ffmpeg_cmd.c
+        <span class="k">${</span><span class="nv">CMAKE_SOURCE_DIR</span><span class="k">}</span>/ffmpeg_thread.c
+        <span class="o">)</span>
+<span class="c">#加载动态库，作为本地库使用.</span>
+add_library<span class="o">(</span>ffmpeg
+        SHARED
+        IMPORTED <span class="o">)</span>
+set_target_properties<span class="o">(</span> ffmpeg
+        PROPERTIES IMPORTED_LOCATION
+        ../../../../libs/<span class="k">${</span><span class="nv">CMAKE_ANDROID_ARCH_ABI</span><span class="k">}</span>/libffmpeg.so <span class="o">)</span>
+
+<span class="nb">set</span><span class="o">(</span>my_lib_path <span class="k">${</span><span class="nv">CMAKE_SOURCE_DIR</span><span class="k">}</span>/../../../libs/<span class="k">${</span><span class="nv">CMAKE_ANDROID_ARCH_ABI</span><span class="k">}</span><span class="o">)</span>
+<span class="c">#设置c++编译标记，代表当前项目使用c++编译. -L${my_lib_path}</span>
+<span class="nb">set</span><span class="o">(</span>CMAKE_C_FLAGS  <span class="s2">"</span><span class="k">${</span><span class="nv">CMAKE_C_FLAGS</span><span class="k">}</span><span class="s2">"</span><span class="o">)</span>
+
+<span class="c"># 引入头文件.</span>
+include_directories<span class="o">(</span><span class="k">${</span><span class="nv">CMAKE_SOURCE_DIR</span><span class="k">}</span><span class="o">)</span>
+include_directories<span class="o">(</span><span class="k">${</span><span class="nv">CMAKE_SOURCE_DIR</span><span class="k">}</span>/ffmpeg<span class="o">)</span>
+include_directories<span class="o">(</span><span class="k">${</span><span class="nv">CMAKE_SOURCE_DIR</span><span class="k">}</span>/include<span class="o">)</span>
+
+find_library<span class="o">(</span>
+              log-lib
+              log <span class="o">)</span>
+
+<span class="c">#链接共享库到目标库libnative-lib中.</span>
+target_link_libraries<span class="o">(</span>
+                       ffmpeg-cmd
+                       ffmpeg
+<span class="c">#                        avfilter avformat avcodec avutil swresample swscale</span>
+                        android
+                        z
+                        OpenSLES
+                       <span class="k">${</span><span class="nv">log</span><span class="p">-lib</span><span class="k">}</span> <span class="o">)</span>
+
+</code></pre></div></div>
+
+<h2 id="5-修改ffmpegc源码">5. 修改<code class="language-plaintext highlighter-rouge">ffmpeg.c</code>源码</h2>
+<ul>
+  <li>ffmpeg.c</li>
+</ul>
+
+<p>修改main方法：</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 修改前</span>
+<span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span>
+
+<span class="c1">// 修改后</span>
+<span class="kt">int</span> <span class="n">ffmpeg_exec</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>在ffmpeg_cleanup函数执行结束前重新初始化：</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">void</span> <span class="nf">ffmpeg_cleanup</span><span class="p">(</span><span class="kt">int</span> <span class="n">ret</span><span class="p">)</span> <span class="p">{</span>
+	
+    <span class="c1">// 省略其他代码...</span>
+    
+    <span class="n">nb_filtergraphs</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">nb_output_files</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">nb_output_streams</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">nb_input_files</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">nb_input_streams</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>在print_report函数中添加代码实现FFmpeg命令执行进度的回调：</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="k">static</span> <span class="kt">void</span> <span class="nf">print_report</span><span class="p">(</span><span class="kt">int</span> <span class="n">is_last_report</span><span class="p">,</span> <span class="kt">int64_t</span> <span class="n">timer_start</span><span class="p">,</span> <span class="kt">int64_t</span> <span class="n">cur_time</span><span class="p">)</span> <span class="p">{</span>
+    
+    <span class="c1">// 省略其他代码...</span>
+    
+    <span class="c1">// 定义已处理的时长</span>
+    <span class="kt">float</span> <span class="n">mss</span><span class="p">;</span>
+    
+    <span class="n">secs</span> <span class="o">=</span> <span class="n">FFABS</span><span class="p">(</span><span class="n">pts</span><span class="p">)</span> <span class="o">/</span> <span class="n">AV_TIME_BASE</span><span class="p">;</span>
+    <span class="n">us</span> <span class="o">=</span> <span class="n">FFABS</span><span class="p">(</span><span class="n">pts</span><span class="p">)</span> <span class="o">%</span> <span class="n">AV_TIME_BASE</span><span class="p">;</span>
+    <span class="c1">// 获取已处理的时长</span>
+    <span class="n">mss</span> <span class="o">=</span> <span class="n">secs</span> <span class="o">+</span> <span class="p">((</span><span class="kt">float</span><span class="p">)</span> <span class="n">us</span> <span class="o">/</span> <span class="n">AV_TIME_BASE</span><span class="p">);</span>
+    
+    <span class="c1">// 调用ffmpeg_progress将进度传到Java层，代码后面定义</span>
+    <span class="n">ffmpeg_progress</span><span class="p">(</span><span class="n">mss</span><span class="p">);</span>
+    
+    <span class="c1">// 省略其他代码...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>ffmpeg.h</li>
+</ul>
+
+<p>添加ffmpeg_exec方法的声明：</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="nf">ffmpeg_exec</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">);</span>
+</code></pre></div></div>
+
+<ul>
+  <li>cmdutils.c</li>
+</ul>
+
+<p>修改exit_program函数：</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">exit_program</span><span class="p">(</span><span class="kt">int</span> <span class="n">ret</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">program_exit</span><span class="p">)</span>
+        <span class="n">program_exit</span><span class="p">(</span><span class="n">ret</span><span class="p">);</span>
+
+    <span class="c1">// 退出线程(该函数后面定义)</span>
+    <span class="n">ffmpeg_thread_exit</span><span class="p">(</span><span class="n">ret</span><span class="p">);</span>
+
+    <span class="c1">// 删掉下面这行代码，不然执行结束，应用会crash</span>
+    <span class="c1">//exit(ret);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="错误处理">错误处理</h2>
+<ul>
+  <li>cpp编译总报错，原因c++和c不能混编，源码也改为c即可.</li>
+  <li>hw_device_free_all等几个函数找不到，因为我们的lib没有打开avdevice</li>
+</ul>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">打开</span><span class="n">ffmpeg</span><span class="p">.</span><span class="n">c</span><span class="err">在文件末尾追加几个空方法</span> <span class="p">.</span> 
+
+<span class="n">HWDevice</span> <span class="o">*</span><span class="nf">hw_device_get_by_name</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">)</span> <span class="p">{</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">hw_device_init_from_string</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="n">HWDevice</span> <span class="o">**</span><span class="n">dev</span><span class="p">)</span> <span class="p">{</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">hw_device_free_all</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">hw_device_setup_for_decode</span><span class="p">(</span><span class="n">InputStream</span> <span class="o">*</span><span class="n">ist</span><span class="p">)</span> <span class="p">{</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">hw_device_setup_for_encode</span><span class="p">(</span><span class="n">OutputStream</span> <span class="o">*</span><span class="n">ost</span><span class="p">)</span> <span class="p">{</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">hwaccel_decode_init</span><span class="p">(</span><span class="n">AVCodecContext</span> <span class="o">*</span><span class="n">avctx</span><span class="p">){</span>
+
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>解析文件流错误，明天看 58.flv无法读取文件错误.</li>
+  <li>打开了ffmpeg的日志输出到anndroid_log发先是因为上面的定义的几个空方法没有正确的值返回,解决办法挨个删除没有用的方法，找到引用的地方Hwdevic改为NUll</li>
+</ul>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="mi">1</span><span class="p">.</span> <span class="n">ffmpeg</span><span class="p">.</span><span class="n">c</span>
+<span class="cm">/*ret = hwaccel_decode_init(s);
+            if (ret &lt; 0) {
+                if (ist-&gt;hwaccel_id == HWACCEL_GENERIC) {
+                    av_log(NULL, AV_LOG_FATAL,
+                           "%s hwaccel requested for input stream #%d:%d, "
+                           "but cannot be initialized.\n",
+                           av_hwdevice_get_type_name(config-&gt;device_type),
+                           ist-&gt;file_index, ist-&gt;st-&gt;index);
+                    return AV_PIX_FMT_NONE;
+                }
+                continue;
+            }*/</span>
+ <span class="cm">/*ret = hw_device_setup_for_decode(ist);
+        if (ret &lt; 0) {
+            snprintf(error, error_len, "Device setup failed for "
+                     "decoder on input stream #%d:%d : %s",
+                     ist-&gt;file_index, ist-&gt;st-&gt;index, av_err2str(ret));
+            return ret;
+        }*/</span>
+        
+<span class="mi">2</span><span class="p">.</span> <span class="n">ffmpeg_opt</span><span class="p">.</span><span class="n">c</span>
+
+<span class="k">static</span> <span class="kt">int</span> <span class="nf">opt_init_hw_device</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">optctx</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">opt</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">arg</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">strcmp</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="s">"list"</span><span class="p">))</span> <span class="p">{</span>
+        <span class="k">enum</span> <span class="n">AVHWDeviceType</span> <span class="n">type</span> <span class="o">=</span> <span class="n">AV_HWDEVICE_TYPE_NONE</span><span class="p">;</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">"Supported hardware device types:</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+        <span class="k">while</span> <span class="p">((</span><span class="n">type</span> <span class="o">=</span> <span class="n">av_hwdevice_iterate_types</span><span class="p">(</span><span class="n">type</span><span class="p">))</span> <span class="o">!=</span>
+               <span class="n">AV_HWDEVICE_TYPE_NONE</span><span class="p">)</span>
+            <span class="n">printf</span><span class="p">(</span><span class="s">"%s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">av_hwdevice_get_type_name</span><span class="p">(</span><span class="n">type</span><span class="p">));</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+        <span class="n">exit_program</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span><span class="c1">//hw_device_init_from_string(arg, NULL);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="kt">int</span> <span class="nf">opt_filter_hw_device</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">optctx</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">opt</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">arg</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">filter_hw_device</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">av_log</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">AV_LOG_ERROR</span><span class="p">,</span> <span class="s">"Only one filter device can be used.</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">AVERROR</span><span class="p">(</span><span class="n">EINVAL</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">filter_hw_device</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span><span class="c1">//hw_device_get_by_name(arg);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">filter_hw_device</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">av_log</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">AV_LOG_ERROR</span><span class="p">,</span> <span class="s">"Invalid filter device %s.</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">arg</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">AVERROR</span><span class="p">(</span><span class="n">EINVAL</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="上面搞定了以后你应该就可以正确的执行视频格式转换了-">上面搞定了以后你应该就可以正确的执行视频格式转换了 .</h3>
+
+<ul>
+  <li>那么可以执行是没错，如何停止正在执行命令类似<code class="language-plaintext highlighter-rouge">ctrl+c</code></li>
+  <li>查看改造<code class="language-plaintext highlighter-rouge">ffmpeg.c</code></li>
+</ul>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span><span class="k">static</span><span class="p">]</span> <span class="kt">void</span>
+<span class="nf">sigterm_handler</span><span class="p">(</span><span class="kt">int</span> <span class="n">sig</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">ret</span><span class="p">;</span>
+    <span class="n">received_sigterm</span> <span class="o">=</span> <span class="n">sig</span><span class="p">;</span>
+    <span class="n">received_nb_signals</span><span class="o">++</span><span class="p">;</span>
+    <span class="n">term_exit_sigsafe</span><span class="p">();</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">received_nb_signals</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">write</span><span class="p">(</span><span class="mi">2</span><span class="cm">/*STDERR_FILENO*/</span><span class="p">,</span> <span class="s">"Received &gt; 3 system signals, hard exiting</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span>
+                    <span class="n">strlen</span><span class="p">(</span><span class="s">"Received &gt; 3 system signals, hard exiting</span><span class="se">\n</span><span class="s">"</span><span class="p">));</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">ret</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span> <span class="cm">/* Do nothing */</span> <span class="p">};</span>
+        <span class="n">exit</span><span class="p">(</span><span class="mi">123</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="o">-</span> <span class="err">去掉</span><span class="n">sigterm_handler</span><span class="err">方法的修饰符`</span><span class="k">static</span><span class="err">`</span>
+<span class="o">-</span> <span class="err">在</span><span class="n">ffmpeg</span><span class="p">.</span><span class="n">h</span><span class="err">中定义方法`</span><span class="kt">void</span> <span class="nf">sigterm_handler</span><span class="p">(</span><span class="kt">int</span> <span class="n">sig</span><span class="p">);</span><span class="err">`</span>
+<span class="o">-</span> <span class="err">在</span><span class="n">jni</span><span class="err">代码中调用</span> <span class="err">`</span><span class="n">sigterm_handler</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">);</span><span class="err">`</span> <span class="err">如下所示：</span>
+
+<span class="cm">/**
+ * 取消线程
+ */</span>
+<span class="kt">void</span> <span class="nf">ffmpeg_thread_cancel</span><span class="p">(){</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">ret</span><span class="o">=</span><span class="nb">NULL</span><span class="p">;</span>
+    <span class="n">LOGE</span><span class="p">(</span><span class="s">"ffmpeg_thread_cancel: stop the main looper transcode with code :%d "</span><span class="p">,</span><span class="n">SIGINT</span><span class="p">);</span>
+    <span class="n">sigterm_handler</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">);</span>
+    <span class="n">pthread_join</span><span class="p">(</span><span class="n">ntid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ret</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="完整代码github-source-code-">完整代码<a href="https://github.com/jdpxiaoming/FFmpegTools/">Github source code </a></h3>
+
+<ul>
+  <li><a href="https://github.com/jdpxiaoming/FFmpegTools/">GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.</a></li>
+</ul>
+
+  </div><a class="u-url" href="/jekyll/update/2020/05/18/ffmpeg-android.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">poe Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">poe Blog</li><li><a class="u-email" href="mailto:302940116@qq.com">302940116@qq.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">jdpxiaoming</span></a></li><li><a href="https://www.twitter.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">jdpxiaoming</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>不积跬步无以至千里，先从一篇blog出发， 归纳总结出一个多媒体安卓工程师的技术轨迹。</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
