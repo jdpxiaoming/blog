@@ -1,0 +1,137 @@
+---
+layout: post
+title:  "FFmpeg4.0.2编译一个so文件2020成功"
+date:   2020-05-18 17:48:01 +0800
+categories: jekyll update
+---
+FFmpeg4.0.2编译一个so文件20200514成功
+===
+
+# 2020/05/14
+
+### 环境
+- Ubnutu 18.041STL 
+- ndk 路径 `/home/wdz/develop/caixingming/android-ndk-r17c`
+- vultr虚拟机 `/root/poe/android-ndk-r17c`
+
+- 错误1
+```shell
+nasm/yasm not found or too old. Use --disable-x86asm for a crippled build
+```
+- 解决办法：安装yasm `sudo apt-get install yasm`
+
+
+### 编译脚本`build.sh`
+
+```shell
+#!/bin/bash
+export NDK_ROOT=/home/wdz/develop/caixingming/android-ndk-r17c
+export SYSROOT=$NDK_ROOT/platforms/android-21/arch-arm/
+export TOOLCHAIN=$NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64
+export CPU=armv7-a
+#编译后的文件会放置在 当前路径下的android/arm下
+export PREFIX=$(pwd)/android/$CPU
+
+FLAGS="-isystem $NDK_ROOT/sysroot/usr/include/arm-linux-androideabi -D__ANDROID_API__=21 -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16 -mthumb -Wa,--noexecstack -Wformat -Werror=format-security -O0 -fPIC"
+INCLUDES="-isystem $NDK_ROOT/sources/cxx-stl/llvm-libc++/include -isystem $NDK_ROOT/sources/android/support/include -isystem $NDK_ROOT/sources/cxx-stl/llvm-libc++abi/include"
+export ADDITIONAL_CONFIGURE_FLAG=""
+
+./configure --target-os=linux \
+    --prefix=$PREFIX \
+    --arch=arm \
+    --enable-small \
+    --disable-asm \
+    --disable-shared \
+    --enable-static \
+    --disable-programs \
+    --disable-ffmpeg \
+    --disable-ffplay \
+    --disable-ffprobe \
+    --disable-stripping \
+    --cross-prefix=$TOOLCHAIN/bin/arm-linux-androideabi- \
+    --enable-cross-compile \
+    --sysroot=$SYSROOT \
+    --extra-cflags="$FLAGS $INCLUDES" \
+    --extra-cflags="-isysroot $NDK_ROOT/sysroot" \
+    $ADDITIONAL_CONFIGURE_FLAG
+
+make clean
+make
+make install
+```
+
+## 3、报错解决：
+- 报错一: libavcodec/aaccoder.c:803:25: error: expected identifier or '(' before numeric constant
+                     int B0 = 0, B1 = 0;
+    `解决：把 B0 修改为 b0(可以任意改成别的变量名)`
+ 
+- 报错二: 
+
+```shell
+libavcodec/hevc_mvs.c: In function 'derive_spatial_merge_candidates':
+libavcodec/hevc_mvs.c:208:15: error: 'y0000000' undeclared (first use in this function)
+ 
+解决：将libavcodec/hevc_mvs.c文件的变量B0改成b0，xB0改成xb0，yB0改成yb0
+```
+
+- 错误三
+
+```shell
+In file included from /home/wdz/develop/caixingming/android-ndk-r17c/sysroot/usr/include/arm-linux-androideabi/asm/termbits.h:19:0,
+                 from /home/wdz/develop/caixingming/android-ndk-r17c/sysroot/usr/include/asm-generic/termios.h:21,
+                 from /home/wdz/develop/caixingming/android-ndk-r17c/sysroot/usr/include/arm-linux-androideabi/asm/termios.h:19,
+                 from /home/wdz/develop/caixingming/android-ndk-r17c/sysroot/usr/include/linux/termios.h:22,
+                 from /home/wdz/develop/caixingming/android-ndk-r17c/sysroot/usr/include/sys/ioctl.h:38,
+                 from ./libavutil/timer.h:36,
+                 from ./libavutil/internal.h:42,
+                 from ./libavutil/common.h:491,
+                 from ./libavutil/avutil.h:296,
+                 from ./libavutil/mem.h:35,
+                 from libavcodec/opustab.h:26,
+                 from libavcodec/opus_pvq.c:26:
+libavcodec/opus_pvq.c: In function 'quant_band_template':
+libavcodec/opus_pvq.c:498:9: error: expected identifier or '(' before numeric constant
+     int B0 = blocks;
+
+
+解决办法：1. 进入libavcodec/opus_pvq.c把 B0都改为b0
+解决办法：2. 修改/sysroot/usr/include/arm-linux-androideabi/asm/termbits.h:19:0
+#define B0的位置，在下边添加一句:
+#undef B0 
+```
+
+### 打包成一个so脚本
+
+- 新建buildso.sh
+
+```shell 
+#!/bin/bash
+export NDK_ROOT=/home/wdz/develop/caixingming/android-ndk-r17c
+export TOOLCHAIN=$NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64
+export SYSROOT=$NDK_ROOT/platforms/android-21/arch-arm
+export PREFIX=./android/armv7-a
+
+# 打包
+$TOOLCHAIN/bin/arm-linux-androideabi-ld \
+        -rpath-link=$SYSROOT/usr/lib \
+        -L$SYSROOT/usr/lib \
+        -L$PREFIX/lib \
+        -soname libffmpeg.so -shared -nostdlib -Bsymbolic --whole-archive --no-undefined -o \
+        $PREFIX/libffmpeg.so \
+        libavcodec/libavcodec.a \
+        libavfilter/libavfilter.a \
+        libavformat/libavformat.a \
+        libavutil/libavutil.a \
+        libswresample/libswresample.a \
+        libswscale/libswscale.a \
+        -lc -lm -lz -ldl -llog --dynamic-linker=/system/bin/linker \
+        $TOOLCHAIN/lib/gcc/arm-linux-androideabi/4.9.x/libgcc.a
+ 
+  # strip 精简文件
+  $TOOLCHAIN/bin/arm-linux-androideabi-strip  $PREFIX/libffmpeg.so
+```
+
+- `sudo sh buildso.so`
+
+
+![pic](/assets/blog_res/9984e5c0.png)
