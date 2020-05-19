@@ -1,0 +1,175 @@
+---
+layout: post
+title:  "Gradle上传Library到jecenter"
+date:   2020-05-19 21:44:01 +0800
+categories: jekyll update
+---
+Gradle上传Library到jecenter
+===
+
+1. 建立脚本`gradle-bintray-upload.gradle`
+
+```groovy
+/*
+ * Copyright 2015 Zhang Rui <bbcallen@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+group = GROUP
+version = VERSION_NAME
+
+bintray {
+    user = project.hasProperty('BINTRAY_USER') ? BINTRAY_USER : System.getenv('BINTRAY_USER')
+    key = project.hasProperty('BINTRAY_APIKEY') ? BINTRAY_APIKEY : System.getenv('BINTRAY_APIKEY')
+
+    configurations = ['archives']
+
+    dryRun = false
+    publish = true
+
+    pkg {
+        repo = 'maven'
+        name = POM_NAME
+        userOrg = POM_USER_ORG
+        desc = POM_DESCRIPTION
+        websiteUrl = POM_URL
+        vcsUrl = POM_SCM_URL
+        licenses = [POM_LICENSE_NAME]
+        labels = ['FFmpeg', 'Android', 'player']
+        publicDownloadNumbers = true
+        version {
+            name = VERSION_NAME
+            gpg {
+                sign = true
+                passphrase = project.hasProperty('GPG_PASSWORD') ? GPG_PASSWORD : System.getenv('GPG_PASSWORD')
+            }
+        }
+    }
+}
+
+install {
+    repositories.mavenInstaller {
+        pom.project {
+            name POM_NAME
+            packaging POM_PACKAGING
+            description POM_DESCRIPTION
+            url POM_URL
+
+            licenses {
+                license {
+                    name POM_LICENSE_NAME
+                    url POM_LICENSE_URL
+                    distribution POM_LICENSE_DIST
+                }
+            }
+
+            scm {
+                url POM_SCM_URL
+                connection POM_SCM_CONNECTION
+                developerConnection POM_SCM_DEV_CONNECTION
+            }
+
+            developers {
+                developer {
+                    id POM_DEVELOPER_ID
+                    name POM_DEVELOPER_NAME
+                    email POM_DEVELOPER_EMAIL
+                }
+            }
+        }
+    }
+}
+
+```
+
+
+- 根目录`build.gradle`增加上传插件
+
+```groovy
+ dependencies {
+        classpath 'com.android.tools.build:gradle:3.6.1'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.4.1'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7'
+    }
+```
+
+- 在对应的`xxxModulize/build.gradle`最后一行引用配置.
+
+```groovy
+//加上这些，如果插件里面有中文
+tasks.withType(Javadoc) {
+    options{ encoding "UTF-8"
+        charSet 'UTF-8'
+        links "http://docs.oracle.com/javase/7/docs/api"
+    }
+}
+apply from: new File(rootProject.projectDir, 'tools/gradle-bintray-upload.gradle')
+```
+
+### 申请jfrog的bintray账号
+- [Bintray - Create Your Bintray Account](https://bintray.com/signup/oss)
+- 创建你想使用的组织id ex:media
+- 进入media组织新建一个repo ex:maven/类型：Maven
+
+
+## 在你的`gradle.properties`配置行号信息
+
+```
+VERSION_NAME=0.0.1
+VERSION_CODE=100001
+GROUP=com.github.jdpxiaoming
+
+# http://central.sonatype.org/pages/requirements.html
+POM_USER_ORG=media
+POM_DESCRIPTION=Video player based on FFmpeg n4.0.2
+POM_URL=https://github.com/jdpxiaoming/FFmpegTools/
+POM_SCM_URL=https://github.com/jdpxiaoming/FFmpegTools.git
+POM_SCM_CONNECTION=scm:git:git@github.com:jdpxiaoming/FFmpegTools.git
+POM_SCM_DEV_CONNECTION=scm:git:git@github.com:jdpxiaoming/FFmpegTools.git
+POM_LICENSE_NAME=LGPL-2.1
+POM_LICENSE_URL=https://www.gnu.org/licenses/lgpl-2.1.html
+POM_LICENSE_DIST=repo
+POM_DEVELOPER_ID=jdpxiaoming
+POM_DEVELOPER_NAME=Cai Xing Ming
+POM_DEVELOPER_EMAIL=poe.caixingming@gmail.com
+
+# nexus对应的Maven配置.
+RELEASE_REPOSITORY_URL=http://172.16.22.18:8081/repository/android/
+# 这里我的私有仓库只有release仓库，没有建snapshot和release的host仓库,有兴趣可以自行添加.
+SNAPSHOT_REPOSITORY_URL=http://172.16.22.18:8081/repository/android/
+BINTRAY_USER=jdpxiaoming
+BINTRAY_APIKEY=d4aa8328xxxx(此处换成你的bintray api key)
+```
+
+- 传了几次只是传了基本库信息 aar和jar包都没有传上去
+- 使用本地http代理上传很快搞定. 
+- 点击action推送到jcenter等到审核通过就可以直接引用了. 
+
+![49a2ecaf.png](/assets/blog_res/49a2ecaf.png)
+
+
+- 在根目录下build.gradle配置地址
+
+```groovy
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        maven { url "https://dl.bintray.com/media/maven" }//审核前可使用
+}
+```
+- 项目源代码：https://github.com/jdpxiaoming/FFmpegTools
