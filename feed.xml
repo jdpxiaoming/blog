@@ -1,4 +1,177 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-05-18T18:15:54+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">poe Blog</title><subtitle>不积跬步无以至千里，先从一篇blog出发， 归纳总结出一个多媒体安卓工程师的技术轨迹。</subtitle><entry><title type="html">Android调用FFmpeg4.0.2的main方法</title><link href="http://localhost:4000/jekyll/update/2020/05/18/ffmpeg-android.html" rel="alternate" type="text/html" title="Android调用FFmpeg4.0.2的main方法" /><published>2020-05-18T17:50:01+08:00</published><updated>2020-05-18T17:50:01+08:00</updated><id>http://localhost:4000/jekyll/update/2020/05/18/ffmpeg-android</id><content type="html" xml:base="http://localhost:4000/jekyll/update/2020/05/18/ffmpeg-android.html">&lt;h1 id=&quot;android调用ffmpeg402的main方法&quot;&gt;Android调用FFmpeg4.0.2的main方法&lt;/h1&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-05-19T21:46:42+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">poe Blog</title><subtitle>不积跬步无以至千里，先从一篇blog出发， 归纳总结出一个多媒体安卓工程师的技术轨迹。</subtitle><entry><title type="html">Gradle上传Library到jecenter</title><link href="http://localhost:4000/jekyll/update/2020/05/19/jcenter.html" rel="alternate" type="text/html" title="Gradle上传Library到jecenter" /><published>2020-05-19T21:44:01+08:00</published><updated>2020-05-19T21:44:01+08:00</updated><id>http://localhost:4000/jekyll/update/2020/05/19/jcenter</id><content type="html" xml:base="http://localhost:4000/jekyll/update/2020/05/19/jcenter.html">&lt;h1 id=&quot;gradle上传library到jecenter&quot;&gt;Gradle上传Library到jecenter&lt;/h1&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;建立脚本&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gradle-bintray-upload.gradle&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-groovy highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cm&quot;&gt;/*
+ * Copyright 2015 Zhang Rui &amp;lt;bbcallen@gmail.com&amp;gt;
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;apply&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;plugin:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'com.github.dcendents.android-maven'&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;apply&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;plugin:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'com.jfrog.bintray'&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;group&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;GROUP&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;version&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VERSION_NAME&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;bintray&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;user&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;project&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;hasProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'BINTRAY_USER'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BINTRAY_USER&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getenv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'BINTRAY_USER'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;key&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;project&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;hasProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'BINTRAY_APIKEY'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BINTRAY_APIKEY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getenv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'BINTRAY_APIKEY'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;configurations&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'archives'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;dryRun&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;publish&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;pkg&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;repo&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'maven'&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;POM_NAME&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;userOrg&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;POM_USER_ORG&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;desc&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;POM_DESCRIPTION&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;websiteUrl&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;POM_URL&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;vcsUrl&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;POM_SCM_URL&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;licenses&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;POM_LICENSE_NAME&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;labels&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'FFmpeg'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'Android'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'player'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;publicDownloadNumbers&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;version&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VERSION_NAME&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;gpg&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;sign&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;passphrase&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;project&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;hasProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'GPG_PASSWORD'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;GPG_PASSWORD&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getenv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'GPG_PASSWORD'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;install&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;repositories&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;mavenInstaller&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;pom&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;project&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;POM_NAME&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;packaging&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;POM_PACKAGING&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;description&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;POM_DESCRIPTION&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;url&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;POM_URL&lt;/span&gt;
+
+            &lt;span class=&quot;n&quot;&gt;licenses&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;license&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;POM_LICENSE_NAME&lt;/span&gt;
+                    &lt;span class=&quot;n&quot;&gt;url&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;POM_LICENSE_URL&lt;/span&gt;
+                    &lt;span class=&quot;n&quot;&gt;distribution&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;POM_LICENSE_DIST&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+            &lt;span class=&quot;n&quot;&gt;scm&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;url&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;POM_SCM_URL&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;connection&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;POM_SCM_CONNECTION&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;developerConnection&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;POM_SCM_DEV_CONNECTION&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+            &lt;span class=&quot;n&quot;&gt;developers&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;developer&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;n&quot;&gt;id&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;POM_DEVELOPER_ID&lt;/span&gt;
+                    &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;POM_DEVELOPER_NAME&lt;/span&gt;
+                    &lt;span class=&quot;n&quot;&gt;email&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;POM_DEVELOPER_EMAIL&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;根目录&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;build.gradle&lt;/code&gt;增加上传插件&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-groovy highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &lt;span class=&quot;n&quot;&gt;dependencies&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;classpath&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'com.android.tools.build:gradle:3.6.1'&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;classpath&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'com.github.dcendents:android-maven-gradle-plugin:1.4.1'&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;classpath&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7'&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;在对应的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;xxxModulize/build.gradle&lt;/code&gt;最后一行引用配置.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-groovy highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;//加上这些，如果插件里面有中文&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;tasks&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;withType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Javadoc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;options&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;encoding&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;UTF-8&quot;&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;charSet&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'UTF-8'&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;links&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;http://docs.oracle.com/javase/7/docs/api&quot;&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;apply&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;from:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rootProject&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;projectDir&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'tools/gradle-bintray-upload.gradle'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;申请jfrog的bintray账号&quot;&gt;申请jfrog的bintray账号&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://bintray.com/signup/oss&quot;&gt;Bintray - Create Your Bintray Account&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;创建你想使用的组织id ex:media&lt;/li&gt;
+  &lt;li&gt;进入media组织新建一个repo ex:maven/类型：Maven&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;在你的gradleproperties配置行号信息&quot;&gt;在你的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gradle.properties&lt;/code&gt;配置行号信息&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;VERSION_NAME=0.0.1
+VERSION_CODE=100001
+GROUP=com.github.jdpxiaoming
+
+# http://central.sonatype.org/pages/requirements.html
+POM_USER_ORG=media
+POM_DESCRIPTION=Video player based on FFmpeg n4.0.2
+POM_URL=https://github.com/jdpxiaoming/FFmpegTools/
+POM_SCM_URL=https://github.com/jdpxiaoming/FFmpegTools.git
+POM_SCM_CONNECTION=scm:git:git@github.com:jdpxiaoming/FFmpegTools.git
+POM_SCM_DEV_CONNECTION=scm:git:git@github.com:jdpxiaoming/FFmpegTools.git
+POM_LICENSE_NAME=LGPL-2.1
+POM_LICENSE_URL=https://www.gnu.org/licenses/lgpl-2.1.html
+POM_LICENSE_DIST=repo
+POM_DEVELOPER_ID=jdpxiaoming
+POM_DEVELOPER_NAME=Cai Xing Ming
+POM_DEVELOPER_EMAIL=poe.caixingming@gmail.com
+
+# nexus对应的Maven配置.
+RELEASE_REPOSITORY_URL=http://172.16.22.18:8081/repository/android/
+# 这里我的私有仓库只有release仓库，没有建snapshot和release的host仓库,有兴趣可以自行添加.
+SNAPSHOT_REPOSITORY_URL=http://172.16.22.18:8081/repository/android/
+BINTRAY_USER=jdpxiaoming
+BINTRAY_APIKEY=d4aa8328xxxx(此处换成你的bintray api key)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;传了几次只是传了基本库信息 aar和jar包都没有传上去&lt;/li&gt;
+  &lt;li&gt;使用本地http代理上传很快搞定.&lt;/li&gt;
+  &lt;li&gt;点击action推送到jcenter等到审核通过就可以直接引用了.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/blog_res/49a2ecaf.png&quot; alt=&quot;49a2ecaf.png&quot; /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;在根目录下build.gradle配置地址&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-groovy highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;allprojects&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;repositories&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;google&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;jcenter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;maven&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;url&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;https://dl.bintray.com/media/maven&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;//审核前可使用&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;ul&gt;
+  &lt;li&gt;项目源代码：https://github.com/jdpxiaoming/FFmpegTools&lt;/li&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">Gradle上传Library到jecenter</summary></entry><entry><title type="html">Android调用FFmpeg4.0.2的main方法</title><link href="http://localhost:4000/jekyll/update/2020/05/18/ffmpeg-android.html" rel="alternate" type="text/html" title="Android调用FFmpeg4.0.2的main方法" /><published>2020-05-18T17:50:01+08:00</published><updated>2020-05-18T17:50:01+08:00</updated><id>http://localhost:4000/jekyll/update/2020/05/18/ffmpeg-android</id><content type="html" xml:base="http://localhost:4000/jekyll/update/2020/05/18/ffmpeg-android.html">&lt;h1 id=&quot;android调用ffmpeg402的main方法&quot;&gt;Android调用FFmpeg4.0.2的main方法&lt;/h1&gt;
 
 &lt;h2 id=&quot;1-将上一章中我们编译的单个so或者多个so或者静态xxa都行拷贝到&quot;&gt;1. 将上一章中我们编译的单个so（或者多个so或者静态xx.a都行）拷贝到&lt;/h2&gt;
 &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;-app
