@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-05-19T21:46:42+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">poe Blog</title><subtitle>不积跬步无以至千里，先从一篇blog出发， 归纳总结出一个多媒体安卓工程师的技术轨迹。</subtitle><entry><title type="html">Gradle上传Library到jecenter</title><link href="http://localhost:4000/jekyll/update/2020/05/19/jcenter.html" rel="alternate" type="text/html" title="Gradle上传Library到jecenter" /><published>2020-05-19T21:44:01+08:00</published><updated>2020-05-19T21:44:01+08:00</updated><id>http://localhost:4000/jekyll/update/2020/05/19/jcenter</id><content type="html" xml:base="http://localhost:4000/jekyll/update/2020/05/19/jcenter.html">&lt;h1 id=&quot;gradle上传library到jecenter&quot;&gt;Gradle上传Library到jecenter&lt;/h1&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-05-19T22:02:26+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">poe Blog</title><subtitle>不积跬步无以至千里，先从一篇blog出发， 归纳总结出一个多媒体安卓工程师的技术轨迹。</subtitle><entry><title type="html">Gradle上传Library到jecenter</title><link href="http://localhost:4000/jekyll/update/2020/05/19/jcenter.html" rel="alternate" type="text/html" title="Gradle上传Library到jecenter" /><published>2020-05-19T21:44:01+08:00</published><updated>2020-05-19T21:44:01+08:00</updated><id>http://localhost:4000/jekyll/update/2020/05/19/jcenter</id><content type="html" xml:base="http://localhost:4000/jekyll/update/2020/05/19/jcenter.html">&lt;h1 id=&quot;gradle上传library到jecenter&quot;&gt;Gradle上传Library到jecenter&lt;/h1&gt;
 
 &lt;ol&gt;
   &lt;li&gt;建立脚本&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gradle-bintray-upload.gradle&lt;/code&gt;&lt;/li&gt;
@@ -148,6 +148,13 @@ RELEASE_REPOSITORY_URL=http://172.16.22.18:8081/repository/android/
 SNAPSHOT_REPOSITORY_URL=http://172.16.22.18:8081/repository/android/
 BINTRAY_USER=jdpxiaoming
 BINTRAY_APIKEY=d4aa8328xxxx(此处换成你的bintray api key)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;在module下新建gradleproperties&quot;&gt;在module下新建&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gradle.properties&lt;/code&gt;&lt;/h2&gt;
+
+&lt;div class=&quot;language-groovy highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;POM_NAME&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ffmpeg&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cmd&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;POM_ARTIFACT_ID&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ffmpeg&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cmd&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;POM_PACKAGING&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;aar&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;ul&gt;
