@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>IikPlayer设置参数超时解析 | poe Blog</title>
+<meta name="generator" content="Jekyll v3.8.7" />
+<meta property="og:title" content="IikPlayer设置参数超时解析" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="IikPlayer设置参数超时解析" />
+<meta property="og:description" content="IikPlayer设置参数超时解析" />
+<link rel="canonical" href="http://localhost:4000/jekyll/update/2020/06/11/ijkplayer03.html" />
+<meta property="og:url" content="http://localhost:4000/jekyll/update/2020/06/11/ijkplayer03.html" />
+<meta property="og:site_name" content="poe Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-06-11T20:27:01+08:00" />
+<script type="application/ld+json">
+{"@type":"BlogPosting","headline":"IikPlayer设置参数超时解析","dateModified":"2020-06-11T20:27:01+08:00","datePublished":"2020-06-11T20:27:01+08:00","url":"http://localhost:4000/jekyll/update/2020/06/11/ijkplayer03.html","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/jekyll/update/2020/06/11/ijkplayer03.html"},"description":"IikPlayer设置参数超时解析","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="poe Blog" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">poe Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">IikPlayer设置参数超时解析</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2020-06-11T20:27:01+08:00" itemprop="datePublished">Jun 11, 2020
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h1 id="iikplayer设置参数超时解析">IikPlayer设置参数超时解析</h1>
+
+<ul>
+  <li>查看入口函数<code class="language-plaintext highlighter-rouge">\ijkplayer\ijkmedia\ijkplayer\android\ijkplayer_jni.c</code></li>
+</ul>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">JNIEXPORT</span> <span class="n">jint</span> <span class="nf">JNI_OnLoad</span><span class="p">(</span><span class="n">JavaVM</span> <span class="o">*</span><span class="n">vm</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">reserved</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">JNIEnv</span><span class="o">*</span> <span class="n">env</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+
+    <span class="n">g_jvm</span> <span class="o">=</span> <span class="n">vm</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">((</span><span class="o">*</span><span class="n">vm</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">GetEnv</span><span class="p">(</span><span class="n">vm</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span><span class="o">**</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">env</span><span class="p">,</span> <span class="n">JNI_VERSION_1_4</span><span class="p">)</span> <span class="o">!=</span> <span class="n">JNI_OK</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">assert</span><span class="p">(</span><span class="n">env</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
+
+    <span class="n">pthread_mutex_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g_clazz</span><span class="p">.</span><span class="n">mutex</span><span class="p">,</span> <span class="nb">NULL</span> <span class="p">);</span>
+
+    <span class="c1">// FindClass returns LocalReference</span>
+    <span class="n">IJK_FIND_JAVA_CLASS</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">g_clazz</span><span class="p">.</span><span class="n">clazz</span><span class="p">,</span> <span class="n">JNI_CLASS_IJKPLAYER</span><span class="p">);</span>
+    <span class="p">(</span><span class="o">*</span><span class="n">env</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">RegisterNatives</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">g_clazz</span><span class="p">.</span><span class="n">clazz</span><span class="p">,</span> <span class="n">g_methods</span><span class="p">,</span> <span class="n">NELEM</span><span class="p">(</span><span class="n">g_methods</span><span class="p">)</span> <span class="p">);</span>
+
+    <span class="n">ijkmp_global_init</span><span class="p">();</span>
+    <span class="n">ijkmp_global_set_inject_callback</span><span class="p">(</span><span class="n">inject_callback</span><span class="p">);</span>
+
+    <span class="n">FFmpegApi_global_init</span><span class="p">(</span><span class="n">env</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="n">JNI_VERSION_1_4</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<ul>
+  <li>我们看到注册了方法集合<code class="language-plaintext highlighter-rouge">g_methods</code>中的函数<code class="language-plaintext highlighter-rouge">_setOption</code>
+    <ul>
+      <li>在java代码层的native有个<code class="language-plaintext highlighter-rouge">native _setOption</code></li>
+    </ul>
+  </li>
+</ul>
+
+<p><img src="/assets/blog_res/bb501cf4.png" alt="bb501cf4.png" /></p>
+
+<ul>
+  <li>查看方法实现 <code class="language-plaintext highlighter-rouge">IjkMediaPlayer_setOptionLong</code></li>
+</ul>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">void</span>
+<span class="nf">IjkMediaPlayer_setOptionLong</span><span class="p">(</span><span class="n">JNIEnv</span> <span class="o">*</span><span class="n">env</span><span class="p">,</span> <span class="n">jobject</span> <span class="n">thiz</span><span class="p">,</span> <span class="n">jint</span> <span class="n">category</span><span class="p">,</span> <span class="n">jobject</span> <span class="n">name</span><span class="p">,</span> <span class="n">jlong</span> <span class="n">value</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">MPTRACE</span><span class="p">(</span><span class="s">"%s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">__func__</span><span class="p">);</span>
+    <span class="n">IjkMediaPlayer</span> <span class="o">*</span><span class="n">mp</span> <span class="o">=</span> <span class="n">jni_get_media_player</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">thiz</span><span class="p">);</span>
+    <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">c_name</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="n">JNI_CHECK_GOTO</span><span class="p">(</span><span class="n">mp</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="s">"java/lang/IllegalStateException"</span><span class="p">,</span> <span class="s">"mpjni: setOptionLong: null mp"</span><span class="p">,</span> <span class="n">LABEL_RETURN</span><span class="p">);</span>
+
+    <span class="n">c_name</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">env</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">GetStringUTFChars</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="nb">NULL</span> <span class="p">);</span>
+    <span class="n">JNI_CHECK_GOTO</span><span class="p">(</span><span class="n">c_name</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="s">"java/lang/OutOfMemoryError"</span><span class="p">,</span> <span class="s">"mpjni: setOptionLong: name.string oom"</span><span class="p">,</span> <span class="n">LABEL_RETURN</span><span class="p">);</span>
+
+    <span class="n">ijkmp_set_option_int</span><span class="p">(</span><span class="n">mp</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">c_name</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+
+<span class="nl">LABEL_RETURN:</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">c_name</span><span class="p">)</span>
+        <span class="p">(</span><span class="o">*</span><span class="n">env</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">ReleaseStringUTFChars</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">c_name</span><span class="p">);</span>
+    <span class="n">ijkmp_dec_ref_p</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mp</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<ul>
+  <li>继续追具体调用<code class="language-plaintext highlighter-rouge">ijkmp_set_option_int(mp, category, c_name, value)</code></li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">ijkmedia\ijkplayer\ijkplayer.c#180</code></p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">ijkmp_set_option_int</span><span class="p">(</span><span class="n">IjkMediaPlayer</span> <span class="o">*</span><span class="n">mp</span><span class="p">,</span> <span class="kt">int</span> <span class="n">opt_category</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">,</span> <span class="kt">int64_t</span> <span class="n">value</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">assert</span><span class="p">(</span><span class="n">mp</span><span class="p">);</span>
+
+    <span class="c1">// MPTRACE("%s(%s, %"PRId64")\n", __func__, name, value);</span>
+    <span class="n">pthread_mutex_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mp</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+    <span class="n">ffp_set_option_int</span><span class="p">(</span><span class="n">mp</span><span class="o">-&gt;</span><span class="n">ffplayer</span><span class="p">,</span> <span class="n">opt_category</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+    <span class="n">pthread_mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mp</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+    <span class="c1">// MPTRACE("%s()=void\n", __func__);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>继续跟进<code class="language-plaintext highlighter-rouge">ffp_set_option_int(mp-&gt;ffplayer, opt_category, name, value)</code>
+<code class="language-plaintext highlighter-rouge">ijkmedia\ijkplayer\ff_ffplay.c#4169</code>
+    <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">ffp_set_option_int</span><span class="p">(</span><span class="n">FFPlayer</span> <span class="o">*</span><span class="n">ffp</span><span class="p">,</span> <span class="kt">int</span> <span class="n">opt_category</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">,</span> <span class="kt">int64_t</span> <span class="n">value</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">ffp</span><span class="p">)</span>
+      <span class="k">return</span><span class="p">;</span>
+
+  <span class="n">AVDictionary</span> <span class="o">**</span><span class="n">dict</span> <span class="o">=</span> <span class="n">ffp_get_opt_dict</span><span class="p">(</span><span class="n">ffp</span><span class="p">,</span> <span class="n">opt_category</span><span class="p">);</span>
+  <span class="n">av_dict_set_int</span><span class="p">(</span><span class="n">dict</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>这里调用了ffmpeg的参数设置<code class="language-plaintext highlighter-rouge">av_dict_set_int</code></li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">ffmpeg\libutil\dict.c#147</code></p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//#147. </span>
+<span class="kt">int</span> <span class="nf">av_dict_set_int</span><span class="p">(</span><span class="n">AVDictionary</span> <span class="o">**</span><span class="n">pm</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="kt">int64_t</span> <span class="n">value</span><span class="p">,</span>
+                <span class="kt">int</span> <span class="n">flags</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">char</span> <span class="n">valuestr</span><span class="p">[</span><span class="mi">22</span><span class="p">];</span>
+    <span class="n">snprintf</span><span class="p">(</span><span class="n">valuestr</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">valuestr</span><span class="p">),</span> <span class="s">"%"</span><span class="n">PRId64</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+    <span class="n">flags</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="n">AV_DICT_DONT_STRDUP_VAL</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">av_dict_set</span><span class="p">(</span><span class="n">pm</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">valuestr</span><span class="p">,</span> <span class="n">flags</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">//#70</span>
+<span class="kt">int</span> <span class="nf">av_dict_set</span><span class="p">(</span><span class="n">AVDictionary</span> <span class="o">**</span><span class="n">pm</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">value</span><span class="p">,</span>
+                <span class="kt">int</span> <span class="n">flags</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">AVDictionary</span> <span class="o">*</span><span class="n">m</span> <span class="o">=</span> <span class="o">*</span><span class="n">pm</span><span class="p">;</span>
+    <span class="n">AVDictionaryEntry</span> <span class="o">*</span><span class="n">tag</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="kt">char</span> <span class="o">*</span><span class="n">oldval</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">*</span><span class="n">copy_key</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">*</span><span class="n">copy_value</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">AV_DICT_MULTIKEY</span><span class="p">))</span> <span class="p">{</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="n">av_dict_get</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">flags</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">AV_DICT_DONT_STRDUP_KEY</span><span class="p">)</span>
+        <span class="n">copy_key</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="n">key</span><span class="p">;</span>
+    <span class="k">else</span>
+        <span class="n">copy_key</span> <span class="o">=</span> <span class="n">av_strdup</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">AV_DICT_DONT_STRDUP_VAL</span><span class="p">)</span>
+        <span class="n">copy_value</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="n">value</span><span class="p">;</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">copy_key</span><span class="p">)</span>
+        <span class="n">copy_value</span> <span class="o">=</span> <span class="n">av_strdup</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">m</span><span class="p">)</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="o">*</span><span class="n">pm</span> <span class="o">=</span> <span class="n">av_mallocz</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">m</span><span class="p">));</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">m</span> <span class="o">||</span> <span class="p">(</span><span class="n">key</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">copy_key</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">value</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">copy_value</span><span class="p">))</span>
+        <span class="k">goto</span> <span class="n">err_out</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">tag</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">AV_DICT_DONT_OVERWRITE</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">av_free</span><span class="p">(</span><span class="n">copy_key</span><span class="p">);</span>
+            <span class="n">av_free</span><span class="p">(</span><span class="n">copy_value</span><span class="p">);</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">AV_DICT_APPEND</span><span class="p">)</span>
+            <span class="n">oldval</span> <span class="o">=</span> <span class="n">tag</span><span class="o">-&gt;</span><span class="n">value</span><span class="p">;</span>
+        <span class="k">else</span>
+            <span class="n">av_free</span><span class="p">(</span><span class="n">tag</span><span class="o">-&gt;</span><span class="n">value</span><span class="p">);</span>
+        <span class="n">av_free</span><span class="p">(</span><span class="n">tag</span><span class="o">-&gt;</span><span class="n">key</span><span class="p">);</span>
+        <span class="o">*</span><span class="n">tag</span> <span class="o">=</span> <span class="n">m</span><span class="o">-&gt;</span><span class="n">elems</span><span class="p">[</span><span class="o">--</span><span class="n">m</span><span class="o">-&gt;</span><span class="n">count</span><span class="p">];</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">copy_value</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">AVDictionaryEntry</span> <span class="o">*</span><span class="n">tmp</span> <span class="o">=</span> <span class="n">av_realloc</span><span class="p">(</span><span class="n">m</span><span class="o">-&gt;</span><span class="n">elems</span><span class="p">,</span>
+                                            <span class="p">(</span><span class="n">m</span><span class="o">-&gt;</span><span class="n">count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">m</span><span class="o">-&gt;</span><span class="n">elems</span><span class="p">));</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">tmp</span><span class="p">)</span>
+            <span class="k">goto</span> <span class="n">err_out</span><span class="p">;</span>
+        <span class="n">m</span><span class="o">-&gt;</span><span class="n">elems</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">copy_value</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">m</span><span class="o">-&gt;</span><span class="n">elems</span><span class="p">[</span><span class="n">m</span><span class="o">-&gt;</span><span class="n">count</span><span class="p">].</span><span class="n">key</span> <span class="o">=</span> <span class="n">copy_key</span><span class="p">;</span>
+        <span class="n">m</span><span class="o">-&gt;</span><span class="n">elems</span><span class="p">[</span><span class="n">m</span><span class="o">-&gt;</span><span class="n">count</span><span class="p">].</span><span class="n">value</span> <span class="o">=</span> <span class="n">copy_value</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">oldval</span> <span class="o">&amp;&amp;</span> <span class="n">flags</span> <span class="o">&amp;</span> <span class="n">AV_DICT_APPEND</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kt">size_t</span> <span class="n">len</span> <span class="o">=</span> <span class="n">strlen</span><span class="p">(</span><span class="n">oldval</span><span class="p">)</span> <span class="o">+</span> <span class="n">strlen</span><span class="p">(</span><span class="n">copy_value</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="kt">char</span> <span class="o">*</span><span class="n">newval</span> <span class="o">=</span> <span class="n">av_mallocz</span><span class="p">(</span><span class="n">len</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">newval</span><span class="p">)</span>
+                <span class="k">goto</span> <span class="n">err_out</span><span class="p">;</span>
+            <span class="n">av_strlcat</span><span class="p">(</span><span class="n">newval</span><span class="p">,</span> <span class="n">oldval</span><span class="p">,</span> <span class="n">len</span><span class="p">);</span>
+            <span class="n">av_freep</span><span class="p">(</span><span class="o">&amp;</span><span class="n">oldval</span><span class="p">);</span>
+            <span class="n">av_strlcat</span><span class="p">(</span><span class="n">newval</span><span class="p">,</span> <span class="n">copy_value</span><span class="p">,</span> <span class="n">len</span><span class="p">);</span>
+            <span class="n">m</span><span class="o">-&gt;</span><span class="n">elems</span><span class="p">[</span><span class="n">m</span><span class="o">-&gt;</span><span class="n">count</span><span class="p">].</span><span class="n">value</span> <span class="o">=</span> <span class="n">newval</span><span class="p">;</span>
+            <span class="n">av_freep</span><span class="p">(</span><span class="o">&amp;</span><span class="n">copy_value</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="n">m</span><span class="o">-&gt;</span><span class="n">count</span><span class="o">++</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="n">av_freep</span><span class="p">(</span><span class="o">&amp;</span><span class="n">copy_key</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">m</span><span class="o">-&gt;</span><span class="n">count</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">av_freep</span><span class="p">(</span><span class="o">&amp;</span><span class="n">m</span><span class="o">-&gt;</span><span class="n">elems</span><span class="p">);</span>
+        <span class="n">av_freep</span><span class="p">(</span><span class="n">pm</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="nl">err_out:</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">m</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">m</span><span class="o">-&gt;</span><span class="n">count</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">av_freep</span><span class="p">(</span><span class="o">&amp;</span><span class="n">m</span><span class="o">-&gt;</span><span class="n">elems</span><span class="p">);</span>
+        <span class="n">av_freep</span><span class="p">(</span><span class="n">pm</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">av_free</span><span class="p">(</span><span class="n">copy_key</span><span class="p">);</span>
+    <span class="n">av_free</span><span class="p">(</span><span class="n">copy_value</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">AVERROR</span><span class="p">(</span><span class="n">ENOMEM</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p>友联 &amp; 相关开源项目源码出处.</p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/PPlayer">GitHub - jdpxiaoming/PPlayer: ffmpeg 4.0.2静态库从0开始一个播放器的搭建，支持rtmp、rtsp、hls、本地MP4文件播放，音视频同步，直播推流</a></p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/ijkrtspdemo">GitHub - jdpxiaoming/ijkrtspdemo: ijkplayer open the rtsp &amp; h265 surpport android demo .</a></p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/FFmpegTools/">GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.</a></p>
+  </li>
+</ul>
+
+
+  </div><a class="u-url" href="/jekyll/update/2020/06/11/ijkplayer03.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">poe Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">poe Blog</li><li><a class="u-email" href="mailto:302940116@qq.com">302940116@qq.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">jdpxiaoming</span></a></li><li><a href="https://www.twitter.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">jdpxiaoming</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>不积跬步无以至千里，先从一篇blog出发， 归纳总结出一个多媒体安卓工程师的技术轨迹。</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

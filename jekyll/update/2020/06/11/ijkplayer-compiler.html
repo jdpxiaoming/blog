@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>ijkplayer编译2020 Centos 7 &amp; Ubuntu18.04.1 | poe Blog</title>
+<meta name="generator" content="Jekyll v3.8.7" />
+<meta property="og:title" content="ijkplayer编译2020 Centos 7 &amp; Ubuntu18.04.1" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="ijkplayer编译Centos 7 &amp; Ubuntu18.04.1 ijkplayer编译Centos 7日志20200423成功 2020/04/13 支持pcm_a/u编译成功含arm64库 ijkplayer编译ubuntu 18.04.1 STL 日志20200325成功" />
+<meta property="og:description" content="ijkplayer编译Centos 7 &amp; Ubuntu18.04.1 ijkplayer编译Centos 7日志20200423成功 2020/04/13 支持pcm_a/u编译成功含arm64库 ijkplayer编译ubuntu 18.04.1 STL 日志20200325成功" />
+<link rel="canonical" href="http://localhost:4000/jekyll/update/2020/06/11/ijkplayer-compiler.html" />
+<meta property="og:url" content="http://localhost:4000/jekyll/update/2020/06/11/ijkplayer-compiler.html" />
+<meta property="og:site_name" content="poe Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-06-11T20:10:01+08:00" />
+<script type="application/ld+json">
+{"@type":"BlogPosting","headline":"ijkplayer编译2020 Centos 7 &amp; Ubuntu18.04.1","dateModified":"2020-06-11T20:10:01+08:00","datePublished":"2020-06-11T20:10:01+08:00","url":"http://localhost:4000/jekyll/update/2020/06/11/ijkplayer-compiler.html","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/jekyll/update/2020/06/11/ijkplayer-compiler.html"},"description":"ijkplayer编译Centos 7 &amp; Ubuntu18.04.1 ijkplayer编译Centos 7日志20200423成功 2020/04/13 支持pcm_a/u编译成功含arm64库 ijkplayer编译ubuntu 18.04.1 STL 日志20200325成功","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="poe Blog" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">poe Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">ijkplayer编译2020 Centos 7 &amp; Ubuntu18.04.1</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2020-06-11T20:10:01+08:00" itemprop="datePublished">Jun 11, 2020
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h1 id="ijkplayer编译centos-7--ubuntu18041">ijkplayer编译Centos 7 &amp; Ubuntu18.04.1</h1>
+<ul>
+  <li>ijkplayer编译<code class="language-plaintext highlighter-rouge">Centos 7</code>日志20200423成功</li>
+  <li>2020/04/13 支持<code class="language-plaintext highlighter-rouge">pcm_a/u</code>编译成功含<code class="language-plaintext highlighter-rouge">arm64库</code></li>
+  <li>ijkplayer编译<code class="language-plaintext highlighter-rouge">ubuntu 18.04.1 STL</code> 日志20200325成功</li>
+</ul>
+
+<h1 id="环境">环境</h1>
+<ol>
+  <li>ubuntu18.04.1LTS()</li>
+  <li>ndk:<a href="https://dl.google.com/android/repository/android-ndk-r13b-linux-x86_64.zip">ndk-r13b</a></li>
+  <li><a href="https://github.com/Bilibili/ijkplayer/releases">ijkplayer k0.8.8</a></li>
+</ol>
+
+<h1 id="1-安装需要的组件vimgitcurlopen-jdkunzipyasm">1. 安装需要的组件(vim/git/curl/open-jdk/unzip/yasm)</h1>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo apt-get install vim openssh-server git curl wget tar unzip build-essential openjdk-8-jdk yasm python
+</code></pre></div></div>
+
+<ul>
+  <li>centos 7</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo yum install vim openssh-server git curl wget tar unzip build-essential openjdk-8-jdk yasm python
+yum groupinstall Development tools
+yum install gcc gcc-c++ gcc-g gcc-gnat gcc-java gcc-objc libgcj libgcj-devel libgnat libobjc libstdc++ zlib-devel zlib openssl openssl-devel
+yum install cmake
+
+</code></pre></div></div>
+
+<h1 id="2--用bash代替dash-不一定需要弹出窗口选择no">2. // 用bash代替dash (不一定需要)，弹出窗口选择NO</h1>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo dpkg-reconfigure dash
+</code></pre></div></div>
+<ul>
+  <li>centos 7 默认使用<code class="language-plaintext highlighter-rouge">bash</code></li>
+</ul>
+
+<h1 id="3-配置环境变量">3. 配置环境变量</h1>
+<blockquote>
+  <p>下载NDK后解压到/opt/Android/目录下：</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo unzip android-ndk_r13b-linux-x86_64.zip
+
+$ sudo mv android-ndk-r13b /opt/Android/
+</code></pre></div></div>
+
+<blockquote>
+  <p>添加环境变量到profile：</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo vim /etc/profile
+
+在文件末尾增加如下内容：
+
+export ANDROID_NDK=/opt/Android/android-ndk-r13b
+
+export PATH=$PATH:$ANDROID_NDK
+
+完成后重启Ubuntu或者在终端中source一下profile：
+
+$ source /etc/profile
+</code></pre></div></div>
+
+<h1 id="4-克隆ijkplayer代码">4. 克隆ijkplayer代码</h1>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git clone https://github.com/Bilibili/ijkplayer ijkplayer-android
+</code></pre></div></div>
+
+<h1 id="5编译配置">5.编译配置</h1>
+
+<h5 id="ijkplayer有三种编译配置">ijkplayer有三种编译配置：</h5>
+
+<ul>
+  <li>1）.支持较多格式(完全编译，几乎所有格式都支持了)，文件较大：</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd config
+rm module.sh
+ln -s module-default.sh module.sh
+</code></pre></div></div>
+
+<ul>
+  <li>2）.支持较少格式，包含hevc：</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd config
+rm module.sh
+ln -s module-lite-hevc.sh module.sh
+
+</code></pre></div></div>
+
+<ul>
+  <li>3）.支持较少格式(默认)：</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd config
+rm module.sh
+ln -s module-lite.sh module.sh
+</code></pre></div></div>
+
+<h1 id="6初始化">6.初始化，</h1>
+<h3 id="61-拉取ffmpeg">6.1 拉取ffmpeg:</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./init-android.sh
+</code></pre></div></div>
+
+<h3 id="62-拉取openssl-android源码使其支持https">6.2 拉取openssl Android源码，使其支持Https:</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./init-android-openssl.sh
+</code></pre></div></div>
+
+<h3 id="63-编译各个平台的编译openssl和ffmpeg">6.3 编译各个平台的编译openssl和ffmpeg:</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd android/contrib
+
+//编译各平台的openssl
+./compile-openssl.sh clean
+./compile-openssl.sh all 
+
+//编译ffmpeg软解码库
+./compile-ffmpeg.sh clean
+./compile-ffmpeg.sh all
+
+// 编译ijkplayer
+
+$ cd ..
+
+$ ./compile-ijk.sh all
+</code></pre></div></div>
+
+<blockquote>
+  <p>注：如果在编译ffmpeg时有报：fatal error: linux/perf_event.h: No such file or directory错误，那么在ijkplayer-android/config/module.sh的末尾增加：</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-linux-perf"
+</code></pre></div></div>
+
+<p>再重新编译即可。
+使用方法</p>
+
+<h2 id="ijkplayer-androidandroidijkplayer目录是一个android-studio工程经过编译后即是一个完整的工程可以直接拷贝出来用android-studio打开使用">ijkplayer-android/android/ijkplayer目录是一个Android Studio工程，经过编译后即是一个完整的工程，可以直接拷贝出来用Android Studio打开使用。</h2>
+
+<blockquote>
+  <p>ijkplayer-example：示例</p>
+</blockquote>
+
+<blockquote>
+  <p>ijkplayer-java：java层的库(必须的)</p>
+</blockquote>
+
+<blockquote>
+  <p>ijkplayer-xxx：各种架构的so库</p>
+</blockquote>
+
+<blockquote>
+  <p>ijkplayer-exo：对ExoPlayer的封装</p>
+</blockquote>
+
+<h4 id="也可以将lib工程中的so拷贝到新建的工程中只需要依赖对应版本的java层的库即可这里是k088">也可以将lib工程中的so拷贝到新建的工程中，只需要依赖对应版本的java层的库即可，这里是k0.8.8：</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>implementation 'tv.danmaku.ijk.media:ijkplayer-java:0.8.8'
+</code></pre></div></div>
+
+<p>### 支持rtsp的编译配置</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> #! /usr/bin/env bash
+
+#--------------------
+# Standard options:
+export COMMON_FF_CFG_FLAGS=
+# export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --prefix=PREFIX"
+
+# Licensing options:
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-gpl"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-nonfree"
+
+# Configuration options:
+
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-runtime-cpudetect"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-gray"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-swscale-alpha"
+
+# Program options:
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-programs"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-ffmpeg"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-ffplay"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-ffprobe"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-ffserver"
+
+# Documentation options:
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-doc"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-htmlpages"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-manpages"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-podpages"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-txtpages"
+
+# Component options:
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-avdevice"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-avcodec"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-avformat"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-avutil"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-swresample"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-swscale"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-postproc"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-avfilter"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-avresample"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-network"
+
+# Hardware accelerators:
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-d3d11va"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-dxva2"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-vaapi"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-vda"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-vdpau"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-videotoolbox"
+
+# Individual component options:
+# export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-everything"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-encoders"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-encoder=png"
+
+# ./configure --list-decoders
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-decoders"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-decoder=aac"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-decoder=aac_latm"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-decoder=flv"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-decoder=h264"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-decoder=mp3*"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-decoder=vp6f"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-decoder=flac"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-decoder=hevc"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-decoder=vp8"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-decoder=vp9"
+
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-hwaccels"
+
+# ./configure --list-muxers
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-muxers"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-muxer=mp4"
+
+# ./configure --list-demuxers
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-demuxers"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-demuxer=aac"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-demuxer=concat"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-demuxer=data"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-demuxer=flv"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-demuxer=hls"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-demuxer=live_flv"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-demuxer=mov"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-demuxer=mp3"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-demuxer=mpegps"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-demuxer=mpegts"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-demuxer=mpegvideo"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-demuxer=flac"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-demuxer=hevc"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-demuxer=webm_dash_manifest"
+
+# ./configure --list-parsers
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-parsers"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-parser=aac"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-parser=aac_latm"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-parser=h264"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-parser=flac"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-parser=vp9"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-parser=hevc"
+
+
+# ./configure --list-bsf
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-bsfs"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-bsf=chomp"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-bsf=dca_core"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-bsf=dump_extradata"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-bsf=hevc_mp4toannexb"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-bsf=imx_dump_header"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-bsf=mjpeg2jpeg"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-bsf=mjpega_dump_header"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-bsf=mov2textsub"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-bsf=mp3_header_decompress"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-bsf=mpeg4_unpack_bframes"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-bsf=noise"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-bsf=remove_extradata"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-bsf=text2movsub"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-bsf=vp9_superframe"
+
+# ./configure --list-protocols
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-protocols"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-protocol=async"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-protocol=bluray"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-protocol=concat"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-protocol=crypto"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-protocol=ffrtmpcrypt"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-protocol=ffrtmphttp"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-protocol=gopher"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-protocol=icecast"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-protocol=librtmp*"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-protocol=libssh"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-protocol=md5"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-protocol=mmsh"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-protocol=mmst"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-protocol=rtmp*"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-protocol=rtmp"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-protocol=rtmpt"
+#export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-protocol=rtp"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-protocol=sctp"
+#export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-protocol=srtp"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-protocol=subfile"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-protocol=unix"
+#
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-devices"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-filters"
+# External library support:
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-iconv"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-audiotoolbox"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-videotoolbox"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-linux-perf"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --disable-bzlib"
+
+#rtsp支持. 
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-demuxer=rtsp"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-demuxer=mjpeg"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-demuxer=sdp"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-demuxer=rtp"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-decoder=mjpeg"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-protocol=rtp"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-protocol=tcp"
+
+#支持更多的音频格式pcm_alaw、pcm_mulaw等等(h265搭配pcm_alaw). 
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-decoder=pcm_alaw"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-decoder=pcm_mulaw"
+#export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-decoder=mpeg4"
+#export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-decoder=mp2*"
+#export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-decoder=ac3"
+#打开音频格式ADPCM G.726解码器.
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-decoder=adpcm_g726"
+# demuxer. 
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-demuxer=pcm_alaw"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-demuxer=pcm_mulaw"
+export COMMON_FF_CFG_FLAGS="$COMMON_FF_CFG_FLAGS --enable-demuxer=adpcm_g726"
+
+</code></pre></div></div>
+
+<h1 id="最后安装node-js服务下载压缩包">最后安装node-js服务下载压缩包</h1>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo apt install nodejs
+sudo apt install npm 
+npm install -g express-generator
+npm install -g express 
+express myStudy -e 创建项目， 再cd 进入该目录，输入命令：npm install 安装组件 ，最后执行命令：npm start 启动项目
+
+拷贝文件到项目/public/images/11.txt
+访问：http://xxx.xxx.xx/images/11.txt
+
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p>友联 &amp; 相关开源项目源码出处.</p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/PPlayer">GitHub - jdpxiaoming/PPlayer: ffmpeg 4.0.2静态库从0开始一个播放器的搭建，支持rtmp、rtsp、hls、本地MP4文件播放，音视频同步，直播推流</a></p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/ijkrtspdemo">GitHub - jdpxiaoming/ijkrtspdemo: ijkplayer open the rtsp &amp; h265 surpport android demo .</a></p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/FFmpegTools/">GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.</a></p>
+  </li>
+</ul>
+
+  </div><a class="u-url" href="/jekyll/update/2020/06/11/ijkplayer-compiler.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">poe Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">poe Blog</li><li><a class="u-email" href="mailto:302940116@qq.com">302940116@qq.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">jdpxiaoming</span></a></li><li><a href="https://www.twitter.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">jdpxiaoming</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>不积跬步无以至千里，先从一篇blog出发， 归纳总结出一个多媒体安卓工程师的技术轨迹。</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

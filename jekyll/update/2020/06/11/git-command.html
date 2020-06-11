@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Git常用语法 | poe Blog</title>
+<meta name="generator" content="Jekyll v3.8.7" />
+<meta property="og:title" content="Git常用语法" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Git常用语法" />
+<meta property="og:description" content="Git常用语法" />
+<link rel="canonical" href="http://localhost:4000/jekyll/update/2020/06/11/git-command.html" />
+<meta property="og:url" content="http://localhost:4000/jekyll/update/2020/06/11/git-command.html" />
+<meta property="og:site_name" content="poe Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-06-11T21:10:01+08:00" />
+<script type="application/ld+json">
+{"@type":"BlogPosting","headline":"Git常用语法","dateModified":"2020-06-11T21:10:01+08:00","datePublished":"2020-06-11T21:10:01+08:00","url":"http://localhost:4000/jekyll/update/2020/06/11/git-command.html","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/jekyll/update/2020/06/11/git-command.html"},"description":"Git常用语法","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="poe Blog" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">poe Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Git常用语法</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2020-06-11T21:10:01+08:00" itemprop="datePublished">Jun 11, 2020
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h1 id="git常用语法">Git常用语法</h1>
+
+<h1 id="使用git同时提交代码到两个source">使用git同时提交代码到两个source</h1>
+<ul>
+  <li>ex:ijkplayer源码同时修改后提交到github和公司的gitserver</li>
+</ul>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 1. 增加多个仓库地址，都是git即可. </span>
+git remote set-url origin <span class="nt">--add</span> https://github.com/jdpxiaoming/ijkrtspdemo.git
+git remote set-url origin <span class="nt">--add</span> http://172.30.17.99/Bonobo.Git.Server/IjkPlayer_wdz.git
+
+在 .git/config 里得到
+
+…
+<span class="o">[</span>remote “origin”]
+url <span class="o">=</span> https://github.com/jdpxiaoming/ijkrtspdemo.git
+url <span class="o">=</span> http://172.30.17.99/Bonobo.Git.Server/IjkPlayer_wdz.git
+
+<span class="c"># 2. 强制推送到两个地址</span>
+git push <span class="nt">-f</span> origin master
+
+<span class="c"># 3. 同时拉取多个源的更新</span>
+git pull origin master
+
+
+<span class="c"># 另外一种 use case，你想从 repo1 pull，但是 push 的时候要推送到 repo1 和另一个  repo2，</span>
+git remote set-url origin <span class="nt">--add</span> https://xxx/git
+git remote set-url origin <span class="nt">--push</span> <span class="nt">--add</span> https://xxx/boke
+
+推拉同上.
+</code></pre></div></div>
+
+<h1 id="使用-git-stash-save-20200508-1544保存草稿">使用 git stash save “2020/05/08 15:44”保存草稿</h1>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git stash save <span class="s2">"test-cmd-stash"</span>
+<span class="c">#查看stash 列表 .</span>
+git stash list
+<span class="c">#恢复草稿.  这个指令将缓存堆栈中的第一个stash删除，并将对应修改应用到当前的工作目录下。 </span>
+git stash pop
+<span class="c">#将缓存堆栈中的stash多次应用到工作目录中，但并不删除stash拷贝</span>
+git stash apply
+<span class="c">#移除stash</span>
+git stash list
+git stash drop stash@<span class="o">{</span>0<span class="o">}</span>
+
+<span class="c">#删除所有缓存的stash。</span>
+git stash clear
+
+</code></pre></div></div>
+
+<h1 id="基于master创建分支并推送到服务器">基于master创建分支并推送到服务器</h1>
+<p>A、查看本地分支
+–</p>
+<blockquote>
+  <p>使用 git branch命令，如下：</p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git branch
+<span class="k">*</span> master
+<span class="k">*</span>标识的是你当前所在的分支。
+
+</code></pre></div></div>
+
+<h2 id="b查看远程分支">B、查看远程分支</h2>
+<blockquote>
+  <p>命令如下：</p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git branch <span class="nt">-r</span>
+</code></pre></div></div>
+<p>C、查看所有分支
+—</p>
+<blockquote>
+  <p>命令如下：</p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git branch <span class="nt">-a</span>
+</code></pre></div></div>
+
+<h2 id="2本地创建新的分支">2、本地创建新的分支</h2>
+<blockquote>
+  <p>命令如下：</p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git branch <span class="o">[</span>branch name]
+</code></pre></div></div>
+
+<blockquote>
+  <p>例如：</p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git branch gh-dev
+</code></pre></div></div>
+
+<h2 id="3切换到新的分支">3、切换到新的分支</h2>
+<blockquote>
+  <p>命令如下：</p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git checkout <span class="o">[</span>branch name]
+</code></pre></div></div>
+
+<blockquote>
+  <p>例如：</p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git checkout gh-dev
+Switched to branch <span class="s1">'gh-dev'</span>
+</code></pre></div></div>
+
+<h2 id="4创建切换分支">4、创建+切换分支</h2>
+<blockquote>
+  <p>创建分支的同时切换到该分支上，命令如下：</p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git checkout <span class="nt">-b</span> <span class="o">[</span>branch name]
+</code></pre></div></div>
+<blockquote>
+  <p>git checkout -b [branch name] 的效果相当于以下两步操作：</p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git branch <span class="o">[</span>branch name]
+git checkout <span class="o">[</span>branch name]
+
+</code></pre></div></div>
+
+<h2 id="5将新分支推送到github">5、将新分支推送到github</h2>
+
+<blockquote>
+  <p>命令如下：</p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git push origin <span class="o">[</span>branch name]
+</code></pre></div></div>
+
+<blockquote>
+  <p>例如：</p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git push origin gh-dev
+</code></pre></div></div>
+<p>6、删除本地分支
+—</p>
+
+<blockquote>
+  <p>命令如下：</p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git branch <span class="nt">-d</span> <span class="o">[</span>branch name]
+</code></pre></div></div>
+
+<blockquote>
+  <p>例如：</p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git branch <span class="nt">-d</span> gh-dev
+</code></pre></div></div>
+
+<h2 id="7删除github远程分支">7、删除github远程分支</h2>
+
+<blockquote>
+  <p>命令如下：</p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git push origin :[branch name]
+</code></pre></div></div>
+
+<h2 id="分支名前的冒号代表删除">分支名前的冒号代表删除。</h2>
+<blockquote>
+  <p>例如：</p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git push origin :gh-dev
+</code></pre></div></div>
+
+<h2 id="三git提交本地代码到新分支">三、git提交本地代码到新分支</h2>
+<p>1、切换到新的分支
+—</p>
+<blockquote>
+  <p>命令如下：</p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git checkout <span class="o">[</span>branch name]
+</code></pre></div></div>
+
+<blockquote>
+  <p>例如：</p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git checkout gh-dev
+
+Switched to branch <span class="s1">'gh-dev'</span>
+</code></pre></div></div>
+
+<h2 id="2添加本地需要提交代码">2、添加本地需要提交代码</h2>
+<blockquote>
+  <p>命令如下：</p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git add <span class="nb">.</span>
+</code></pre></div></div>
+
+<h2 id="3提交本地代码">3、提交本地代码</h2>
+<blockquote>
+  <p>命令如下：</p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git commit <span class="nt">-m</span> <span class="s2">"add my code to new branchB"</span>
+</code></pre></div></div>
+
+<h2 id="4push-到git仓库">4、push 到git仓库</h2>
+<blockquote>
+  <p>命令如下：</p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git push origin <span class="o">[</span>branch name]
+</code></pre></div></div>
+
+<blockquote>
+  <p>例如：</p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git push origin gh-dev
+</code></pre></div></div>
+
+<p>四、 合并分支ijkplayer到主线版本modulize</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#查看分支</span>
+git branch <span class="nt">-a</span>
+<span class="c">#切换到主线版本</span>
+git checkout modulize
+<span class="c">#拉取代码修改的dev分支修改到本地</span>
+git pull origin/ijkplayer
+<span class="c">#提交修改，解决冲突</span>
+git commit xxx
+<span class="c">#合并好的本地代码，推送上去 </span>
+git push origin/modulize 
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p>友联 &amp; 相关开源项目源码出处.</p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/PPlayer">GitHub - jdpxiaoming/PPlayer: ffmpeg 4.0.2静态库从0开始一个播放器的搭建，支持rtmp、rtsp、hls、本地MP4文件播放，音视频同步，直播推流</a></p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/ijkrtspdemo">GitHub - jdpxiaoming/ijkrtspdemo: ijkplayer open the rtsp &amp; h265 surpport android demo .</a></p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/FFmpegTools/">GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.</a></p>
+  </li>
+</ul>
+
+
+  </div><a class="u-url" href="/jekyll/update/2020/06/11/git-command.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">poe Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">poe Blog</li><li><a class="u-email" href="mailto:302940116@qq.com">302940116@qq.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">jdpxiaoming</span></a></li><li><a href="https://www.twitter.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">jdpxiaoming</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>不积跬步无以至千里，先从一篇blog出发， 归纳总结出一个多媒体安卓工程师的技术轨迹。</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
