@@ -320,6 +320,29 @@ void ffmpeg_thread_cancel(){
 }
 ```
 
+- 你会发现取消后无法继续执行下载任务了. 
+- 因为SIGINT被改变了，所以我们再推出任务时应该清楚SIGINIT的状态
+
+- 在`ffmpeg.c/ffmpeg_cleanup`最后增加，并在main函数末尾调用`ffmpeg_cleanup`
+```c
+    received_sigterm = 0;
+    received_nb_signals = 0;
+    transcode_init_done = ATOMIC_VAR_INIT(0);
+```
+
+
+## 执行结束回调
+![e208b2af.png](/assets/blog_res/e208b2af.png)
+
+
 ### 完整代码[Github source code ](https://github.com/jdpxiaoming/FFmpegTools/)
 
+
+- 友联 & 相关开源项目源码出处. 
+
+- [GitHub - jdpxiaoming/PPlayer: ffmpeg 4.0.2静态库从0开始一个播放器的搭建，支持rtmp、rtsp、hls、本地MP4文件播放，音视频同步，直播推流](https://github.com/jdpxiaoming/PPlayer)
+
+- [GitHub - jdpxiaoming/ijkrtspdemo: ijkplayer open the rtsp & h265 surpport android demo .](https://github.com/jdpxiaoming/ijkrtspdemo)
+
 - [GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.](https://github.com/jdpxiaoming/FFmpegTools/)
+

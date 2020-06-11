@@ -1,0 +1,112 @@
+---
+layout: post
+title:  "IikPlayer错误分析-NDK错误定位"
+date:   2020-06-11 20:50:01 +0800
+categories: jekyll update
+---
+NDK错误定位
+===
+
+
+# 1.  `android-addr2line`
+- 位置：`D:\androidsdk\ndk\21.2.6472646\toolchains\arm-linux-androideabi-4.9\prebuilt\windows-x86_64\bin`
+
+ ```c
+1. 64位so
+aarch64-linux-android-addr2line -C -f -e libpplayer.so 00000000004ab974
+2. 32位so 
+arm-linux-androideabi-addr2line -C -f -e libffmpeg-cmd.so 00000000004ab974
+```
+
+# 2. FFmpeg打开安卓的日志输出
+- 先定义一个android_log的文件
+
+```c
+//#include <android/log.h>
+//#define LOGE(format, ...)  __android_log_print(ANDROID_LOG_ERROR, "ffmpeg_vdtest", format, ##__VA_ARGS__)
+//#define LOGI(format, ...)  __android_log_print(ANDROID_LOG_INFO,  "ffmpeg_vdtest", format, ##__VA_ARGS__)
+#include <android/log.h>
+static int use_log_report = 0;
+
+
+#define FF_LOG_TAG     "FFmpegTools"
+
+
+#define FF_LOG_UNKNOWN     ANDROID_LOG_UNKNOWN
+#define FF_LOG_DEFAULT        ANDROID_LOG_DEFAULT
+
+
+#define FF_LOG_VERBOSE     ANDROID_LOG_VERBOSE
+#define FF_LOG_DEBUG         ANDROID_LOG_DEBUG
+#define FF_LOG_INFO              ANDROID_LOG_INFO
+#define FF_LOG_WARN           ANDROID_LOG_WARN
+#define FF_LOG_ERROR        ANDROID_LOG_ERROR
+#define FF_LOG_FATAL           ANDROID_LOG_FATAL
+#define FF_LOG_SILENT         ANDROID_LOG_SILENT
+
+
+#define VLOG(level, TAG, ...)    ((void)__android_log_vprint(level, TAG, __VA_ARGS__))
+#define VLOGV(...)  VLOG(FF_LOG_VERBOSE,   FF_LOG_TAG, __VA_ARGS__)
+#define VLOGD(...)  VLOG(FF_LOG_DEBUG,     FF_LOG_TAG, __VA_ARGS__)
+#define VLOGI(...)  VLOG(FF_LOG_INFO,      FF_LOG_TAG, __VA_ARGS__)
+#define VLOGW(...)  VLOG(FF_LOG_WARN,      FF_LOG_TAG, __VA_ARGS__)
+#define VLOGE(...)  VLOG(FF_LOG_ERROR,     FF_LOG_TAG, __VA_ARGS__)
+
+
+#define ALOG(level, TAG, ...)    ((void)__android_log_print(level, TAG, __VA_ARGS__))
+#define ALOGV(...)  ALOG(FF_LOG_VERBOSE,   FF_LOG_TAG, __VA_ARGS__)
+#define ALOGD(...)  ALOG(FF_LOG_DEBUG,     FF_LOG_TAG, __VA_ARGS__)
+#define ALOGI(...)  ALOG(FF_LOG_INFO,      FF_LOG_TAG, __VA_ARGS__)
+#define ALOGW(...)  ALOG(FF_LOG_WARN,      FF_LOG_TAG, __VA_ARGS__)
+#define ALOGE(...)  ALOG(FF_LOG_ERROR,     FF_LOG_TAG, __VA_ARGS__)
+
+#define LOGE(format, ...)  __android_log_print(ANDROID_LOG_ERROR, FF_LOG_TAG, format, ##__VA_ARGS__)
+#define LOGI(format, ...)  __android_log_print(ANDROID_LOG_INFO,  FF_LOG_TAG, format, ##__VA_ARGS__)
+
+```
+
+- 在ffmpeg入口地方ffmpeg.c#main上方定义一个回调日志方法
+
+```c
+static void log_callback_test2(void *ptr, int level, const char *fmt, va_list vl)
+{
+    va_list vl2;
+    char *line = malloc(128 * sizeof(char));
+    static int print_prefix = 1;
+    va_copy(vl2, vl);
+    av_log_format_line(ptr, level, fmt, vl2, line, 128, &print_prefix);
+    va_end(vl2);
+    line[127] = '\0';
+    LOGE("%s", line);
+    free(line);
+}
+
+//main函数入口.
+int ffmpeg_exec(int argc, char **argv)
+{
+    int i, ret;
+    int64_t ti;
+
+    init_dynload();
+
+    register_exit(ffmpeg_cleanup);
+
+    setvbuf(stderr,NULL,_IONBF,0); /* win32 runtime needs this */
+//  注释掉系统的log等级，强制使用安卓的log系统. 
+//    av_log_set_flags(AV_LOG_SKIP_REPEATED);
+//    parse_loglevel(argc, argv, options);
+    av_log_set_callback(log_callback_test2);
+    ...
+}
+
+```
+
+
+- 友联 & 相关开源项目源码出处. 
+
+- [GitHub - jdpxiaoming/PPlayer: ffmpeg 4.0.2静态库从0开始一个播放器的搭建，支持rtmp、rtsp、hls、本地MP4文件播放，音视频同步，直播推流](https://github.com/jdpxiaoming/PPlayer)
+
+- [GitHub - jdpxiaoming/ijkrtspdemo: ijkplayer open the rtsp & h265 surpport android demo .](https://github.com/jdpxiaoming/ijkrtspdemo)
+
+- [GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.](https://github.com/jdpxiaoming/FFmpegTools/)
+

@@ -1,0 +1,195 @@
+---
+layout: post
+title:  "IikPlayer设置参数超时解析"
+date:   2020-06-11 20:27:01 +0800
+categories: jekyll update
+---
+IikPlayer设置参数超时解析
+===
+
+-  查看入口函数`\ijkplayer\ijkmedia\ijkplayer\android\ijkplayer_jni.c`
+
+```c
+JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
+{
+    JNIEnv* env = NULL;
+
+    g_jvm = vm;
+    if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_4) != JNI_OK) {
+        return -1;
+    }
+    assert(env != NULL);
+
+    pthread_mutex_init(&g_clazz.mutex, NULL );
+
+    // FindClass returns LocalReference
+    IJK_FIND_JAVA_CLASS(env, g_clazz.clazz, JNI_CLASS_IJKPLAYER);
+    (*env)->RegisterNatives(env, g_clazz.clazz, g_methods, NELEM(g_methods) );
+
+    ijkmp_global_init();
+    ijkmp_global_set_inject_callback(inject_callback);
+
+    FFmpegApi_global_init(env);
+
+    return JNI_VERSION_1_4;
+}
+```
+- 我们看到注册了方法集合`g_methods`中的函数`_setOption`
+  - 在java代码层的native有个`native _setOption`
+  
+![bb501cf4.png](/assets/blog_res/bb501cf4.png)
+
+- 查看方法实现 `IjkMediaPlayer_setOptionLong`
+
+```c
+static void
+IjkMediaPlayer_setOptionLong(JNIEnv *env, jobject thiz, jint category, jobject name, jlong value)
+{
+    MPTRACE("%s\n", __func__);
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    const char *c_name = NULL;
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setOptionLong: null mp", LABEL_RETURN);
+
+    c_name = (*env)->GetStringUTFChars(env, name, NULL );
+    JNI_CHECK_GOTO(c_name, env, "java/lang/OutOfMemoryError", "mpjni: setOptionLong: name.string oom", LABEL_RETURN);
+
+    ijkmp_set_option_int(mp, category, c_name, value);
+
+LABEL_RETURN:
+    if (c_name)
+        (*env)->ReleaseStringUTFChars(env, name, c_name);
+    ijkmp_dec_ref_p(&mp);
+}
+```
+- 继续追具体调用`ijkmp_set_option_int(mp, category, c_name, value)`
+
+`ijkmedia\ijkplayer\ijkplayer.c#180`
+
+```c
+void ijkmp_set_option_int(IjkMediaPlayer *mp, int opt_category, const char *name, int64_t value)
+{
+    assert(mp);
+
+    // MPTRACE("%s(%s, %"PRId64")\n", __func__, name, value);
+    pthread_mutex_lock(&mp->mutex);
+    ffp_set_option_int(mp->ffplayer, opt_category, name, value);
+    pthread_mutex_unlock(&mp->mutex);
+    // MPTRACE("%s()=void\n", __func__);
+}
+```
+
+- 继续跟进`ffp_set_option_int(mp->ffplayer, opt_category, name, value)`
+`ijkmedia\ijkplayer\ff_ffplay.c#4169`
+```c
+void ffp_set_option_int(FFPlayer *ffp, int opt_category, const char *name, int64_t value)
+{
+    if (!ffp)
+        return;
+
+    AVDictionary **dict = ffp_get_opt_dict(ffp, opt_category);
+    av_dict_set_int(dict, name, value, 0);
+}
+```
+
+- 这里调用了ffmpeg的参数设置`av_dict_set_int`
+
+`ffmpeg\libutil\dict.c#147`
+```c
+//#147. 
+int av_dict_set_int(AVDictionary **pm, const char *key, int64_t value,
+                int flags)
+{
+    char valuestr[22];
+    snprintf(valuestr, sizeof(valuestr), "%"PRId64, value);
+    flags &= ~AV_DICT_DONT_STRDUP_VAL;
+    return av_dict_set(pm, key, valuestr, flags);
+}
+
+//#70
+int av_dict_set(AVDictionary **pm, const char *key, const char *value,
+                int flags)
+{
+    AVDictionary *m = *pm;
+    AVDictionaryEntry *tag = NULL;
+    char *oldval = NULL, *copy_key = NULL, *copy_value = NULL;
+
+    if (!(flags & AV_DICT_MULTIKEY)) {
+        tag = av_dict_get(m, key, NULL, flags);
+    }
+    if (flags & AV_DICT_DONT_STRDUP_KEY)
+        copy_key = (void *)key;
+    else
+        copy_key = av_strdup(key);
+    if (flags & AV_DICT_DONT_STRDUP_VAL)
+        copy_value = (void *)value;
+    else if (copy_key)
+        copy_value = av_strdup(value);
+    if (!m)
+        m = *pm = av_mallocz(sizeof(*m));
+    if (!m || (key && !copy_key) || (value && !copy_value))
+        goto err_out;
+
+    if (tag) {
+        if (flags & AV_DICT_DONT_OVERWRITE) {
+            av_free(copy_key);
+            av_free(copy_value);
+            return 0;
+        }
+        if (flags & AV_DICT_APPEND)
+            oldval = tag->value;
+        else
+            av_free(tag->value);
+        av_free(tag->key);
+        *tag = m->elems[--m->count];
+    } else if (copy_value) {
+        AVDictionaryEntry *tmp = av_realloc(m->elems,
+                                            (m->count + 1) * sizeof(*m->elems));
+        if (!tmp)
+            goto err_out;
+        m->elems = tmp;
+    }
+    if (copy_value) {
+        m->elems[m->count].key = copy_key;
+        m->elems[m->count].value = copy_value;
+        if (oldval && flags & AV_DICT_APPEND) {
+            size_t len = strlen(oldval) + strlen(copy_value) + 1;
+            char *newval = av_mallocz(len);
+            if (!newval)
+                goto err_out;
+            av_strlcat(newval, oldval, len);
+            av_freep(&oldval);
+            av_strlcat(newval, copy_value, len);
+            m->elems[m->count].value = newval;
+            av_freep(&copy_value);
+        }
+        m->count++;
+    } else {
+        av_freep(&copy_key);
+    }
+    if (!m->count) {
+        av_freep(&m->elems);
+        av_freep(pm);
+    }
+
+    return 0;
+
+err_out:
+    if (m && !m->count) {
+        av_freep(&m->elems);
+        av_freep(pm);
+    }
+    av_free(copy_key);
+    av_free(copy_value);
+    return AVERROR(ENOMEM);
+}
+```
+
+
+- 友联 & 相关开源项目源码出处. 
+
+- [GitHub - jdpxiaoming/PPlayer: ffmpeg 4.0.2静态库从0开始一个播放器的搭建，支持rtmp、rtsp、hls、本地MP4文件播放，音视频同步，直播推流](https://github.com/jdpxiaoming/PPlayer)
+
+- [GitHub - jdpxiaoming/ijkrtspdemo: ijkplayer open the rtsp & h265 surpport android demo .](https://github.com/jdpxiaoming/ijkrtspdemo)
+
+- [GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.](https://github.com/jdpxiaoming/FFmpegTools/)
+

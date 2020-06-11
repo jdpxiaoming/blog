@@ -88,3 +88,11 @@ protected void onStop() {
 
 
 - 想知道ijkplayer是如何编译的吗，下篇文章我们来聊聊 如何编译你的ijkplayer打开rtsp开关、h265、pcma等编码支持，敬请期待！
+
+
+- 友联 & 相关开源项目源码出处. 
+
+[GitHub - jdpxiaoming/PPlayer: ffmpeg 4.0.2静态库从0开始一个播放器的搭建，支持rtmp、rtsp、hls、本地MP4文件播放，音视频同步，直播推流](https://github.com/jdpxiaoming/PPlayer)
+
+[GitHub - jdpxiaoming/ijkrtspdemo: ijkplayer open the rtsp & h265 surpport android demo .](https://github.com/jdpxiaoming/ijkrtspdemo)
+

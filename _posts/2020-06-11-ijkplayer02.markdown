@@ -1,0 +1,103 @@
+---
+layout: post
+title:  "Ijkplayer低延时`200ms`RTSP配置"
+date:   2020-06-11 20:26:01 +0800
+categories: jekyll update
+---
+Ijkplayer低延时`200ms`RTSP配置
+===
+
+```ruby
+I/IJKMEDIA: ===== options =====
+I/IJKMEDIA: player-opts : overlay-format               = 842094169
+I/IJKMEDIA: player-opts : opensles                     = 1
+I/IJKMEDIA: player-opts : mediacodec                   = 1
+I/IJKMEDIA: player-opts : mediacodec-hevc              = 1
+I/IJKMEDIA: player-opts : start-on-prepared            = 1
+I/IJKMEDIA: player-opts : packet-buffering             = 0
+I/IJKMEDIA: player-opts : fast                         = 1
+I/IJKMEDIA: player-opts : mediacodec-auto-rotate       = 0
+I/IJKMEDIA: player-opts : mediacodec-handle-resolution-change = 0
+I/IJKMEDIA: player-opts : min-frames                   = 2
+I/IJKMEDIA: player-opts : max_cached_duration          = 3
+I/IJKMEDIA: player-opts : framedrop                    = 5
+I/IJKMEDIA: format-opts : ijkapplication               = -1671850416
+I/IJKMEDIA: format-opts : ijkiomanager                 = -1471565696
+I/IJKMEDIA: format-opts : rtsp_transport               = tcp
+I/IJKMEDIA: format-opts : rtsp_flags                   = prefer_tcp
+I/IJKMEDIA: format-opts : http-detect-range-support    = 0
+D/IJKMEDIA: FFP_MSG_FLUSH:
+I/IJKMEDIA: format-opts : buffer_size                  = 1024
+I/IJKMEDIA: format-opts : flush_packets                = 1
+I/IJKMEDIA: format-opts : max-fps                      = 0
+I/IJKMEDIA: format-opts : fflags                       = nobuffer
+I/IJKMEDIA: format-opts : infbuf                       = 1
+I/IJKMEDIA: format-opts : analyzemaxduration           = 50
+I/IJKMEDIA: format-opts : probesize                    = 500
+I/IJKMEDIA: format-opts : max-buffer-size              = 0
+I/IJKMEDIA: format-opts : dns_cache_clear              = 1
+I/IJKMEDIA: codec-opts  : skip_loop_filter             = 48
+I/IJKMEDIA: codec-opts  : skip_frame                   = 0
+I/IJKMEDIA: ===================
+```
+
+### Java代码
+```java
+//安卓摄像头是默认Nv21，尝试Yv12。
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", IjkMediaPlayer.SDL_FCC_YV12);
+//开启opensles.
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 0);
+//开启硬解码mediacodec
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 0);
+//开启h265硬解码.
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-hevc", 0);
+//rtsp支持
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "rtsp_transport", "tcp");
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "rtsp_flags", "prefer_tcp");
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 1);
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "http-detect-range-support", 0);
+// 设置是否开启环路过滤: 0开启，画面质量高，解码开销大，48关闭，画面质量差点，解码开销小
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_loop_filter", 48);
+//增加rtmp打开速度. 没有缓存会黑屏1s.
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "buffer_size", 1024);//1316
+// 是否开启预缓冲,直接禁用否则会有14s的卡顿缓冲时间.
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "packet-buffering", 0L);
+// 每处理一个packet之后刷新io上下文
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "flush_packets", 1L);
+// 不额外优化（使能非规范兼容优化，默认值0 ）
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "fast", 1);
+//最大帧率 20
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "max-fps", 0);
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "fflags", "nobuffer");
+//                    "max-fps"
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "infbuf", 1);  // 无限读
+// 设置播放前的最大探测时间 （100未测试是否是最佳值）
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "analyzemaxduration", 50L);
+// 播放前的探测Size，默认是1M（1024）, 改小一点会出画面更快200
+ijkMediaPlayer.setOption(1, "probesize", 500L);
+// 自动旋屏
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-auto-rotate", 0);
+// 处理分辨率变化
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-handle-resolution-change", 0);
+// 最大缓冲大小,单位kb
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "max-buffer-size", 0);
+//默认最小帧数2
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "min-frames", 2);
+// 最大缓存时长
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER,  "max_cached_duration", 3); //300
+// 跳过帧 ？？
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_frame", 0);
+//丢帧多丢点5试试.
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 5);
+//清空dns，因为多种协议播放会缓存协议导致播放h264后无法播放h265.
+ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "dns_cache_clear", 1);
+```
+
+- 友联 & 相关开源项目源码出处. 
+
+- [GitHub - jdpxiaoming/PPlayer: ffmpeg 4.0.2静态库从0开始一个播放器的搭建，支持rtmp、rtsp、hls、本地MP4文件播放，音视频同步，直播推流](https://github.com/jdpxiaoming/PPlayer)
+
+- [GitHub - jdpxiaoming/ijkrtspdemo: ijkplayer open the rtsp & h265 surpport android demo .](https://github.com/jdpxiaoming/ijkrtspdemo)
+
+- [GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.](https://github.com/jdpxiaoming/FFmpegTools/)
+

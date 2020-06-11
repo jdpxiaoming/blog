@@ -78,3 +78,97 @@ ffmpeg -i flv.flv -c:v copy -c:a aac -ab 128k -ar 44100 3.mp4
 
 ```
 
+
+- 命令行
+```java
+ String[] commands = new String[8];
+        commands[0] = "ffmpeg";
+        commands[1] = "-i";
+        commands[2] = inputPath;
+        commands[3] = "-vcodec";
+        commands[4] = "copy";
+        commands[5] = "-acodec";
+        commands[6] = "copy";
+        commands[7] = outputPath;
+```
+
+9. 下载直播流保存到本地mp4文件. 
+```java 
+ffmpeg -i rtsp://@192.168.241.1:62159 -vcodec copy -acodec copy -f mp4 -r 15 C:/DB_Videos/111.mp4
+
+ffmpeg -rtsp_transport tcp -i rtsp://116.62.177.94:5555/rtsp/deb77464-a4b6-42d7-86bf-bc6d73f29189 -vcodec copy -acodec aac -f mp4 -y D:/111.mp4
+```
+
+10. 播放tcp的rtsp数据 
+```shell 
+ffplay -rtsp_transport tcp  rtsp://47.108.81.159:5555/rtsp/00716e06-e3bf-4a53-bd2e-96e3256f96f8 
+```
+
+-  调整视频速率
+
+11. 视频的倍速播放与慢速播放
+- 通过使用 av filter 中的 setpts 来实现：
+```shell
+ffmpeg -i input.mkv -filter:v "setpts=0.5*PTS" output.mkv
+```
+
+- 如果担心会出现丢帧的情况，可以使用 -r 指定输入帧数，如果源视频是30fps，我们想4倍播放：
+```shell
+ffmpeg -i input.mkv -r 120 -filter:v "setpts=0.25*PTS" output.mkv
+```
+
+12. 音频的倍速播放与慢速播放
+- 通过 av filter 中的 atempo 来实现：
+```shell
+ffmpeg -i input.mkv -filter:"atempo = 2.0" -vn output.mkv
+```
+- atempo filter 配置区间在0.5和2.0之间，如果需要更高倍，可以使用多个 atempo filter 串在一起来实现
+
+```shell
+ffmpeg -i input.mkv -filter:"atempo=2.0,atempo=2.0" -vn output.mkv
+```
+
+
+13. 同时对视频和音频倍速播放：
+
+```
+ffmpeg -i input.mkv -filter_complex "[0:v]setpts=0.5*PTS[v];[0:a]atempo=2.0[a]" -map "[v]" -map "[a]" output.mkv
+
+```
+
+#  Android移动端如何使用ffmpeg命令
+[GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.](https://github.com/jdpxiaoming/FFmpegTools)
+
+
+## ffmprobe视频信息分析
+
+- 分析视频帧信息
+
+```shell
+ffprobe -show_frames We_Are_Young.mp4 > frames.info
+```
+
+- 统计I帧数量
+
+```shell
+keyframe=1 : key frame
+pict_type=I : I-frame
+
+cat frames.info | grep “pict_type=I” |wc -l
+```
+
+- 统计视频帧数量
+
+```shell
+cat frames.info | grep “media_type=video” |wc -l
+ffprobe -show_format -show_streams filename
+```
+
+
+- 友联 & 相关开源项目源码出处. 
+
+- [GitHub - jdpxiaoming/PPlayer: ffmpeg 4.0.2静态库从0开始一个播放器的搭建，支持rtmp、rtsp、hls、本地MP4文件播放，音视频同步，直播推流](https://github.com/jdpxiaoming/PPlayer)
+
+- [GitHub - jdpxiaoming/ijkrtspdemo: ijkplayer open the rtsp & h265 surpport android demo .](https://github.com/jdpxiaoming/ijkrtspdemo)
+
+- [GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.](https://github.com/jdpxiaoming/FFmpegTools/)
