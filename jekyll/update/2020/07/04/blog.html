@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>GihubPage个人博客搭建2020/04/28成功. | poe Blog</title>
+<meta name="generator" content="Jekyll v3.8.7" />
+<meta property="og:title" content="GihubPage个人博客搭建2020/04/28成功." />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="GihubPage个人博客搭建2020/04/28成功." />
+<meta property="og:description" content="GihubPage个人博客搭建2020/04/28成功." />
+<link rel="canonical" href="http://localhost:4000/jekyll/update/2020/07/04/blog.html" />
+<meta property="og:url" content="http://localhost:4000/jekyll/update/2020/07/04/blog.html" />
+<meta property="og:site_name" content="poe Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-07-04T16:59:01+08:00" />
+<script type="application/ld+json">
+{"@type":"BlogPosting","headline":"GihubPage个人博客搭建2020/04/28成功.","dateModified":"2020-07-04T16:59:01+08:00","datePublished":"2020-07-04T16:59:01+08:00","url":"http://localhost:4000/jekyll/update/2020/07/04/blog.html","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/jekyll/update/2020/07/04/blog.html"},"description":"GihubPage个人博客搭建2020/04/28成功.","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="poe Blog" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">poe Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">GihubPage个人博客搭建2020/04/28成功. </h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2020-07-04T16:59:01+08:00" itemprop="datePublished">Jul 4, 2020
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h1 id="gihubpage个人博客搭建20200428成功">GihubPage个人博客搭建2020/04/28成功.</h1>
+
+<ul>
+  <li>依赖项目<a href="https://jdpxiaoming.github.io/PPlayer/">PPlayer</a></li>
+</ul>
+
+<h2 id="1-直接在项目中选择开通githubpage选择master分支">1. 直接在项目中选择开通<code class="language-plaintext highlighter-rouge">GithubPage</code>选择master分支</h2>
+
+<h1 id="安装jekyll方便协作博客内容传送">安装<code class="language-plaintext highlighter-rouge">Jekyll</code>方便协作博客内容.<a href="https://jekyllcn.com/docs/github-pages/">传送</a></h1>
+<ul>
+  <li>安装<a href="https://pan.baidu.com/s/1hKtqqBH65js5kNsjJXbDaA">rubyinstall+devkit-2.6.6.1-x64.exe</a></li>
+  <li>提取码：<code class="language-plaintext highlighter-rouge">n7zd</code></li>
+  <li>下载RubyGems</li>
+</ul>
+
+<h3 id="修改ruby的源为国内的镜像淘宝镜像httpmirrorsaliyuncomrubygems或者ruby中国镜像httpsgemsruby-chinaorg">修改ruby的源为国内的镜像：淘宝镜像(http://mirrors.aliyun.com/rubygems/)或者ruby中国镜像(https://gems.ruby-china.org/)。</h3>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem sources <span class="nt">--add</span> http://mirrors.aliyun.com/rubygems/ <span class="nt">--remove</span> https://rubygems.org/
+gem sources <span class="nt">-l</span>
+</code></pre></div></div>
+
+<ul>
+  <li>在Windows下，如果出现证书失败，就去下载一个证书</li>
+</ul>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl http://curl.haxx.se/ca/cacert.pem <span class="nt">-o</span> cacert.pem
+</code></pre></div></div>
+<ul>
+  <li>将下载的cacert.pem移到ruby安装目录的/bin这个目录下，并且在系统环境变量中新建SSL_CERT_FILE，值为刚才的/bin目录的绝对路径，管理员权限打开cmd/PowerShell</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SETX /M SSL_CERT_FILE "C:\Ruby26-x64\bin"
+</code></pre></div></div>
+
+<h3 id="install-jekyll-and-bundler-gems-关闭代理等待一会走aliyun的链接可以完成安装">Install Jekyll and bundler gems. 关闭代理等待一会，走aliyun的链接可以完成安装.</h3>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem <span class="nb">install </span>jekyll bundler
+</code></pre></div></div>
+<ul>
+  <li>查看jekyll版本:<code class="language-plaintext highlighter-rouge">jekyll -v</code></li>
+</ul>
+
+<p><img src="/assets/blog_res/f7a128fa.png" alt="f7a128fa.png" /></p>
+
+<h3 id="建立一个demo网站">建立一个demo网站</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jekyll new my-awesome-site
+
+cd my-awesome-site
+
+bundle exec jekyll serve
+
+# =&gt; Now browse to http://localhost:4000
+
+单独安装依赖：bundle install //还是需要开个系统全局的代理才能成功. 
+</code></pre></div></div>
+
+<h3 id="编辑器推荐vs-code">编辑器推荐<code class="language-plaintext highlighter-rouge">Vs Code</code></h3>
+
+<p><img src="/assets/blog_res/36134f32.png" alt="36134f32.png" /></p>
+
+<h2 id="修改gemfile文件">修改Gemfile文件</h2>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">source</span> <span class="dl">'</span><span class="s1">http://mirrors.aliyun.com/rubygems/</span><span class="dl">'</span> <span class="err">#</span> <span class="err">更改</span><span class="nx">gem</span><span class="err">源可能要设置环境变量</span>
+<span class="err">#</span> <span class="nx">gem</span> <span class="dl">"</span><span class="s2">jekyll</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">~&gt; 4.0.0</span><span class="dl">"</span><span class="err">#</span> <span class="err">注释掉这行</span>
+<span class="nx">gem</span> <span class="dl">'</span><span class="s1">github-pages</span><span class="dl">'</span><span class="p">,</span> <span class="nx">group</span><span class="p">:</span> <span class="p">:</span><span class="nx">jekyll_plugins</span> <span class="err">#</span> <span class="err">去掉这行的注释井号#</span>
+
+<span class="err">#</span> <span class="err">更新</span><span class="nx">jekyll</span>
+<span class="nx">bundle</span> <span class="nx">update</span> 
+
+</code></pre></div></div>
+
+<h2 id="初始化本地站点仓库">初始化本地站点仓库</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd blog
+git init
+git remote add origin git@github.com:userName/blog.git # 与你的github blog仓库建立联系
+git checkout --orphan gh-pages
+</code></pre></div></div>
+
+<h2 id="配置静态站点到origingh-pages分支下">配置静态站点到origin/gh-pages分支下</h2>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd </span>_site <span class="c"># 切换到_site目录</span>
+git init
+git remote add origin git@github.com:jdpxiaoming/blog.git <span class="c"># 与同意github blog仓库建立联系</span>
+git checkout <span class="nt">-b</span> gh-pages
+</code></pre></div></div>
+
+<h2 id="git-删除远程分支">git 删除远程分支</h2>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git branch -ｒ
+使用下面两条命令来删除远程分支
+git branch <span class="nt">-r</span> <span class="nt">-d</span> origin/branch-name
+git push origin :branch-name
+</code></pre></div></div>
+
+<h2 id="生成编译后的静态站点文件并且push到远程仓库">生成编译后的静态站点文件，并且push到远程仓库</h2>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jekyll build
+<span class="nb">cd </span>_site
+git add <span class="nt">--all</span>
+<span class="c">#如果有CNAME需要删除</span>
+<span class="nb">rm </span>CNAME
+
+git commit <span class="nt">-m</span> <span class="s1">'some descriptions'</span>
+
+git push origin gh-pages
+</code></pre></div></div>
+
+<ul>
+  <li>错误：<code class="language-plaintext highlighter-rouge">fatal: refusing to merge unrelated histories</code></li>
+</ul>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git pull origin gh-pages <span class="nt">--allow-unrelated-histories</span>
+</code></pre></div></div>
+
+<h2 id="部署-githubk-setting-githubpages">部署-githubk-setting-Githubpages</h2>
+
+<h2 id="设置阿里云解析倒github">设置阿里云解析倒<code class="language-plaintext highlighter-rouge">Github</code></h2>
+
+<div class="language-groovy highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="n">Ping</span> <span class="n">jdpxiaoming</span><span class="o">.</span><span class="na">github</span><span class="o">.</span><span class="na">io</span> <span class="o">[</span><span class="mf">185.199</span><span class="o">.</span><span class="mf">110.153</span><span class="o">]</span>
+
+ <span class="err">#域名绑定</span>
+<span class="n">blog</span><span class="o">.</span><span class="na">lxfpoe</span><span class="o">.</span><span class="na">work</span>  
+</code></pre></div></div>
+
+<h2 id="上面的域名解析有问题githubpage的ip地址每天会变使用cname配置文件来解决">上面的域名解析有问题githubpage的ip地址每天会变，使用CName配置文件来解决</h2>
+<ul>
+  <li>
+    <p>默认项目下面会生成CNAME，没有自己建一个</p>
+  </li>
+  <li>第一行写入 <code class="language-plaintext highlighter-rouge">blog.lxfpoe.work</code>
+ 阿里云解析注意使用CNAME类型不要直接绑定ip</li>
+  <li>选择CNAME</li>
+</ul>
+
+<p><img src="/assets/blog_res/baf74130.png" alt="baf74130.png" /></p>
+
+<ul>
+  <li>
+    <p><a href="https://blog.lxfpoe.work/">我的小站</a> https://blog.lxfpoe.work/</p>
+  </li>
+  <li>
+    <p>友联 &amp; 相关开源项目源码出处.</p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/PPlayer">GitHub - jdpxiaoming/PPlayer: ffmpeg 4.0.2静态库从0开始一个播放器的搭建，支持rtmp、rtsp、hls、本地MP4文件播放，音视频同步，直播推流</a></p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/ijkrtspdemo">GitHub - jdpxiaoming/ijkrtspdemo: ijkplayer open the rtsp &amp; h265 surpport android demo .</a></p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/FFmpegTools/">GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.</a></p>
+  </li>
+</ul>
+
+
+  </div><a class="u-url" href="/jekyll/update/2020/07/04/blog.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">poe Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">poe Blog</li><li><a class="u-email" href="mailto:302940116@qq.com">302940116@qq.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">jdpxiaoming</span></a></li><li><a href="https://www.twitter.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">jdpxiaoming</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>不积跬步无以至千里，先从一篇blog出发， 归纳总结出一个多媒体安卓工程师的技术轨迹。</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
