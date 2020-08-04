@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>多线程(二) volatile的用途 | poe Blog</title>
+<meta name="generator" content="Jekyll v3.8.7" />
+<meta property="og:title" content="多线程(二) volatile的用途" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="多线程(二) volatile的用途" />
+<meta property="og:description" content="多线程(二) volatile的用途" />
+<link rel="canonical" href="http://localhost:4000/jekyll/update/2020/07/11/multi-thread02.html" />
+<meta property="og:url" content="http://localhost:4000/jekyll/update/2020/07/11/multi-thread02.html" />
+<meta property="og:site_name" content="poe Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-07-11T16:50:01+08:00" />
+<script type="application/ld+json">
+{"@type":"BlogPosting","headline":"多线程(二) volatile的用途","dateModified":"2020-07-11T16:50:01+08:00","datePublished":"2020-07-11T16:50:01+08:00","url":"http://localhost:4000/jekyll/update/2020/07/11/multi-thread02.html","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/jekyll/update/2020/07/11/multi-thread02.html"},"description":"多线程(二) volatile的用途","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="poe Blog" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">poe Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">多线程(二) volatile的用途</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2020-07-11T16:50:01+08:00" itemprop="datePublished">Jul 11, 2020
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h1 id="多线程二-volatile的用途">多线程(二) volatile的用途</h1>
+
+<h1 id="volatile的用途">volatile的用途</h1>
+
+<p><img src="/assets/blog_res/d3156e37.png" alt="02_01.png" /></p>
+
+<h2 id="1线程可见性">1.线程可见性</h2>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mashibing.testvolatile</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">T01_ThreadVisibility</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">volatile</span> <span class="kt">boolean</span> <span class="n">flag</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">InterruptedException</span> <span class="o">{</span>
+        <span class="k">new</span> <span class="nf">Thread</span><span class="o">(()-&gt;</span> <span class="o">{</span>
+            <span class="k">while</span> <span class="o">(</span><span class="n">flag</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">//do sth</span>
+            <span class="o">}</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"end"</span><span class="o">);</span>
+        <span class="o">},</span> <span class="s">"server"</span><span class="o">).</span><span class="na">start</span><span class="o">();</span>
+
+
+        <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">1000</span><span class="o">);</span>
+
+        <span class="n">flag</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="2防止指令重排序">2.防止指令重排序</h2>
+
+<h3 id="问题dcl单例需不需要加volatile">问题：DCL单例需不需要加volatile？</h3>
+
+<h3 id="cpu的基础知识">CPU的基础知识</h3>
+
+<ul>
+  <li>
+    <p>缓存行对齐
+缓存行64个字节是CPU同步的基本单位，缓存行隔离会比伪共享效率要高
+Disruptor</p>
+
+    <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mashibing.juc.c_028_FalseSharing</span><span class="o">;</span>
+  
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">T02_CacheLinePadding</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">Padding</span> <span class="o">{</span>
+        <span class="kd">public</span> <span class="kd">volatile</span> <span class="kt">long</span> <span class="n">p1</span><span class="o">,</span> <span class="n">p2</span><span class="o">,</span> <span class="n">p3</span><span class="o">,</span> <span class="n">p4</span><span class="o">,</span> <span class="n">p5</span><span class="o">,</span> <span class="n">p6</span><span class="o">,</span> <span class="n">p7</span><span class="o">;</span> <span class="c1">//</span>
+    <span class="o">}</span>
+  
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">T</span> <span class="kd">extends</span> <span class="nc">Padding</span> <span class="o">{</span>
+        <span class="kd">public</span> <span class="kd">volatile</span> <span class="kt">long</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0L</span><span class="o">;</span>
+    <span class="o">}</span>
+  
+    <span class="kd">public</span> <span class="kd">static</span> <span class="no">T</span><span class="o">[]</span> <span class="n">arr</span> <span class="o">=</span> <span class="k">new</span> <span class="no">T</span><span class="o">[</span><span class="mi">2</span><span class="o">];</span>
+  
+    <span class="kd">static</span> <span class="o">{</span>
+        <span class="n">arr</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">=</span> <span class="k">new</span> <span class="no">T</span><span class="o">();</span>
+        <span class="n">arr</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span> <span class="o">=</span> <span class="k">new</span> <span class="no">T</span><span class="o">();</span>
+    <span class="o">}</span>
+  
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+        <span class="nc">Thread</span> <span class="n">t1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(()-&gt;{</span>
+            <span class="k">for</span> <span class="o">(</span><span class="kt">long</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">1000_0000L</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+                <span class="n">arr</span><span class="o">[</span><span class="mi">0</span><span class="o">].</span><span class="na">x</span> <span class="o">=</span> <span class="n">i</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">});</span>
+  
+        <span class="nc">Thread</span> <span class="n">t2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(()-&gt;{</span>
+            <span class="k">for</span> <span class="o">(</span><span class="kt">long</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">1000_0000L</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+                <span class="n">arr</span><span class="o">[</span><span class="mi">1</span><span class="o">].</span><span class="na">x</span> <span class="o">=</span> <span class="n">i</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">});</span>
+  
+        <span class="kd">final</span> <span class="kt">long</span> <span class="n">start</span> <span class="o">=</span> <span class="nc">System</span><span class="o">.</span><span class="na">nanoTime</span><span class="o">();</span>
+        <span class="n">t1</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        <span class="n">t2</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        <span class="n">t1</span><span class="o">.</span><span class="na">join</span><span class="o">();</span>
+        <span class="n">t2</span><span class="o">.</span><span class="na">join</span><span class="o">();</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">((</span><span class="nc">System</span><span class="o">.</span><span class="na">nanoTime</span><span class="o">()</span> <span class="o">-</span> <span class="n">start</span><span class="o">)/</span><span class="mi">100_0000</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+  
+</code></pre></div>    </div>
+
+    <p>MESI</p>
+  </li>
+  <li>
+    <p>伪共享</p>
+  </li>
+  <li>
+    <p>合并写
+CPU内部的4个字节的Buffer</p>
+
+    <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mashibing.juc.c_029_WriteCombining</span><span class="o">;</span>
+  
+<span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">WriteCombining</span> <span class="o">{</span>
+  
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="no">ITERATIONS</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">MAX_VALUE</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="no">ITEMS</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">24</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="no">MASK</span> <span class="o">=</span> <span class="no">ITEMS</span> <span class="o">-</span> <span class="mi">1</span><span class="o">;</span>
+  
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">byte</span><span class="o">[]</span> <span class="n">arrayA</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="no">ITEMS</span><span class="o">];</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">byte</span><span class="o">[]</span> <span class="n">arrayB</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="no">ITEMS</span><span class="o">];</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">byte</span><span class="o">[]</span> <span class="n">arrayC</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="no">ITEMS</span><span class="o">];</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">byte</span><span class="o">[]</span> <span class="n">arrayD</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="no">ITEMS</span><span class="o">];</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">byte</span><span class="o">[]</span> <span class="n">arrayE</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="no">ITEMS</span><span class="o">];</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">byte</span><span class="o">[]</span> <span class="n">arrayF</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="no">ITEMS</span><span class="o">];</span>
+  
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="kd">final</span> <span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+  
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">i</span> <span class="o">+</span> <span class="s">" SingleLoop duration (ns) = "</span> <span class="o">+</span> <span class="n">runCaseOne</span><span class="o">());</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">i</span> <span class="o">+</span> <span class="s">" SplitLoop  duration (ns) = "</span> <span class="o">+</span> <span class="n">runCaseTwo</span><span class="o">());</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+  
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">long</span> <span class="nf">runCaseOne</span><span class="o">()</span> <span class="o">{</span>
+        <span class="kt">long</span> <span class="n">start</span> <span class="o">=</span> <span class="nc">System</span><span class="o">.</span><span class="na">nanoTime</span><span class="o">();</span>
+        <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="no">ITERATIONS</span><span class="o">;</span>
+  
+        <span class="k">while</span> <span class="o">(--</span><span class="n">i</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="kt">int</span> <span class="n">slot</span> <span class="o">=</span> <span class="n">i</span> <span class="o">&amp;</span> <span class="no">MASK</span><span class="o">;</span>
+            <span class="kt">byte</span> <span class="n">b</span> <span class="o">=</span> <span class="o">(</span><span class="kt">byte</span><span class="o">)</span> <span class="n">i</span><span class="o">;</span>
+            <span class="n">arrayA</span><span class="o">[</span><span class="n">slot</span><span class="o">]</span> <span class="o">=</span> <span class="n">b</span><span class="o">;</span>
+            <span class="n">arrayB</span><span class="o">[</span><span class="n">slot</span><span class="o">]</span> <span class="o">=</span> <span class="n">b</span><span class="o">;</span>
+            <span class="n">arrayC</span><span class="o">[</span><span class="n">slot</span><span class="o">]</span> <span class="o">=</span> <span class="n">b</span><span class="o">;</span>
+            <span class="n">arrayD</span><span class="o">[</span><span class="n">slot</span><span class="o">]</span> <span class="o">=</span> <span class="n">b</span><span class="o">;</span>
+            <span class="n">arrayE</span><span class="o">[</span><span class="n">slot</span><span class="o">]</span> <span class="o">=</span> <span class="n">b</span><span class="o">;</span>
+            <span class="n">arrayF</span><span class="o">[</span><span class="n">slot</span><span class="o">]</span> <span class="o">=</span> <span class="n">b</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="nc">System</span><span class="o">.</span><span class="na">nanoTime</span><span class="o">()</span> <span class="o">-</span> <span class="n">start</span><span class="o">;</span>
+    <span class="o">}</span>
+  
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">long</span> <span class="nf">runCaseTwo</span><span class="o">()</span> <span class="o">{</span>
+        <span class="kt">long</span> <span class="n">start</span> <span class="o">=</span> <span class="nc">System</span><span class="o">.</span><span class="na">nanoTime</span><span class="o">();</span>
+        <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="no">ITERATIONS</span><span class="o">;</span>
+        <span class="k">while</span> <span class="o">(--</span><span class="n">i</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="kt">int</span> <span class="n">slot</span> <span class="o">=</span> <span class="n">i</span> <span class="o">&amp;</span> <span class="no">MASK</span><span class="o">;</span>
+            <span class="kt">byte</span> <span class="n">b</span> <span class="o">=</span> <span class="o">(</span><span class="kt">byte</span><span class="o">)</span> <span class="n">i</span><span class="o">;</span>
+            <span class="n">arrayA</span><span class="o">[</span><span class="n">slot</span><span class="o">]</span> <span class="o">=</span> <span class="n">b</span><span class="o">;</span>
+            <span class="n">arrayB</span><span class="o">[</span><span class="n">slot</span><span class="o">]</span> <span class="o">=</span> <span class="n">b</span><span class="o">;</span>
+            <span class="n">arrayC</span><span class="o">[</span><span class="n">slot</span><span class="o">]</span> <span class="o">=</span> <span class="n">b</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="no">ITERATIONS</span><span class="o">;</span>
+        <span class="k">while</span> <span class="o">(--</span><span class="n">i</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="kt">int</span> <span class="n">slot</span> <span class="o">=</span> <span class="n">i</span> <span class="o">&amp;</span> <span class="no">MASK</span><span class="o">;</span>
+            <span class="kt">byte</span> <span class="n">b</span> <span class="o">=</span> <span class="o">(</span><span class="kt">byte</span><span class="o">)</span> <span class="n">i</span><span class="o">;</span>
+            <span class="n">arrayD</span><span class="o">[</span><span class="n">slot</span><span class="o">]</span> <span class="o">=</span> <span class="n">b</span><span class="o">;</span>
+            <span class="n">arrayE</span><span class="o">[</span><span class="n">slot</span><span class="o">]</span> <span class="o">=</span> <span class="n">b</span><span class="o">;</span>
+            <span class="n">arrayF</span><span class="o">[</span><span class="n">slot</span><span class="o">]</span> <span class="o">=</span> <span class="n">b</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="nc">System</span><span class="o">.</span><span class="na">nanoTime</span><span class="o">()</span> <span class="o">-</span> <span class="n">start</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+  
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>指令重排序</p>
+
+    <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mashibing.jvm.c3_jmm</span><span class="o">;</span>
+  
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">T04_Disorder</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="o">,</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">0</span><span class="o">,</span> <span class="n">b</span> <span class="o">=</span><span class="mi">0</span><span class="o">;</span>
+  
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">InterruptedException</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="k">for</span><span class="o">(;;)</span> <span class="o">{</span>
+            <span class="n">i</span><span class="o">++;</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+            <span class="nc">Thread</span> <span class="n">one</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(</span><span class="k">new</span> <span class="nc">Runnable</span><span class="o">()</span> <span class="o">{</span>
+                <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+                    <span class="c1">//由于线程one先启动，下面这句话让它等一等线程two. 读着可根据自己电脑的实际性能适当调整等待时间.</span>
+                    <span class="c1">//shortWait(100000);</span>
+                    <span class="n">a</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>
+                    <span class="n">x</span> <span class="o">=</span> <span class="n">b</span><span class="o">;</span>
+                <span class="o">}</span>
+            <span class="o">});</span>
+  
+            <span class="nc">Thread</span> <span class="n">other</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(</span><span class="k">new</span> <span class="nc">Runnable</span><span class="o">()</span> <span class="o">{</span>
+                <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+                    <span class="n">b</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="n">a</span><span class="o">;</span>
+                <span class="o">}</span>
+            <span class="o">});</span>
+            <span class="n">one</span><span class="o">.</span><span class="na">start</span><span class="o">();</span><span class="n">other</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+            <span class="n">one</span><span class="o">.</span><span class="na">join</span><span class="o">();</span><span class="n">other</span><span class="o">.</span><span class="na">join</span><span class="o">();</span>
+            <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="s">"第"</span> <span class="o">+</span> <span class="n">i</span> <span class="o">+</span> <span class="s">"次 ("</span> <span class="o">+</span> <span class="n">x</span> <span class="o">+</span> <span class="s">","</span> <span class="o">+</span> <span class="n">y</span> <span class="o">+</span> <span class="s">"）"</span><span class="o">;</span>
+            <span class="k">if</span><span class="o">(</span><span class="n">x</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">y</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">result</span><span class="o">);</span>
+                <span class="k">break</span><span class="o">;</span>
+            <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+                <span class="c1">//System.out.println(result);</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+  
+  
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">shortWait</span><span class="o">(</span><span class="kt">long</span> <span class="n">interval</span><span class="o">){</span>
+        <span class="kt">long</span> <span class="n">start</span> <span class="o">=</span> <span class="nc">System</span><span class="o">.</span><span class="na">nanoTime</span><span class="o">();</span>
+        <span class="kt">long</span> <span class="n">end</span><span class="o">;</span>
+        <span class="k">do</span><span class="o">{</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="nc">System</span><span class="o">.</span><span class="na">nanoTime</span><span class="o">();</span>
+        <span class="o">}</span><span class="k">while</span><span class="o">(</span><span class="n">start</span> <span class="o">+</span> <span class="n">interval</span> <span class="o">&gt;=</span> <span class="n">end</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h3 id="volatile如何解决指令重排序">volatile如何解决指令重排序</h3>
+
+<p>1: volatile i
+<img src="/assets/blog_res/d957c8fb.jpg" alt="02_02.jpg" />
+<img src="/assets/blog_res/3ed60ab6.jpg" alt="02_03.jpg" />
+<img src="/assets/blog_res/83b47d0a.jpg" alt="03_01.jpg" />
+<img src="/assets/blog_res/8e94157e.jpg" alt="03_02.jpg" />
+<img src="/assets/blog_res/aa9b98a0.png" alt="04_01.png" />
+<img src="/assets/blog_res/6f1aff01.png" alt="04_02.png" /></p>
+
+<p>2: ACC_VOLATILE</p>
+
+<p>3: JVM的内存屏障</p>
+
+<p>4：hotspot实现</p>
+
+<p>bytecodeinterpreter.cpp</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">field_offset</span> <span class="o">=</span> <span class="n">cache</span><span class="o">-&gt;</span><span class="n">f2_as_index</span><span class="p">();</span>
+          <span class="k">if</span> <span class="p">(</span><span class="n">cache</span><span class="o">-&gt;</span><span class="n">is_volatile</span><span class="p">())</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">support_IRIW_for_not_multiple_copy_atomic_cpu</span><span class="p">)</span> <span class="p">{</span>
+              <span class="n">OrderAccess</span><span class="o">::</span><span class="n">fence</span><span class="p">();</span>
+            <span class="p">}</span>
+</code></pre></div></div>
+
+<p>orderaccess_linux_x86.inline.hpp</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">inline</span> <span class="kt">void</span> <span class="n">OrderAccess</span><span class="o">::</span><span class="n">fence</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">os</span><span class="o">::</span><span class="n">is_MP</span><span class="p">())</span> <span class="p">{</span>
+    <span class="c1">// always use locked addl since mfence is sometimes expensive</span>
+<span class="cp">#ifdef AMD64
+</span>    <span class="n">__asm__</span> <span class="k">volatile</span> <span class="p">(</span><span class="s">"lock; addl $0,0(%%rsp)"</span> <span class="o">:</span> <span class="o">:</span> <span class="o">:</span> <span class="s">"cc"</span><span class="p">,</span> <span class="s">"memory"</span><span class="p">);</span>
+<span class="cp">#else
+</span>    <span class="n">__asm__</span> <span class="k">volatile</span> <span class="p">(</span><span class="s">"lock; addl $0,0(%%esp)"</span> <span class="o">:</span> <span class="o">:</span> <span class="o">:</span> <span class="s">"cc"</span><span class="p">,</span> <span class="s">"memory"</span><span class="p">);</span>
+<span class="cp">#endif
+</span>  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p>友联 &amp; 相关开源项目源码出处.</p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/PPlayer">GitHub - jdpxiaoming/PPlayer: ffmpeg 4.0.2静态库从0开始一个播放器的搭建，支持rtmp、rtsp、hls、本地MP4文件播放，音视频同步，直播推流</a></p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/ijkrtspdemo">GitHub - jdpxiaoming/ijkrtspdemo: ijkplayer open the rtsp &amp; h265 surpport android demo .</a></p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/FFmpegTools/">GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.</a></p>
+  </li>
+</ul>
+
+
+  </div><a class="u-url" href="/jekyll/update/2020/07/11/multi-thread02.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">poe Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">poe Blog</li><li><a class="u-email" href="mailto:302940116@qq.com">302940116@qq.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">jdpxiaoming</span></a></li><li><a href="https://www.twitter.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">jdpxiaoming</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>不积跬步无以至千里，先从一篇blog出发， 归纳总结出一个多媒体安卓工程师的技术轨迹。</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

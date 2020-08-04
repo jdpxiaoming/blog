@@ -47,6 +47,30 @@
   <div class="post-content e-content" itemprop="articleBody">
     <h1 id="git常用语法">Git常用语法</h1>
 
+<h1 id="修改远程地址库">修改远程地址库</h1>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>方法一
+进入git_test根目录
+git remote 查看所有远程仓库， git remote xxx 查看指定远程仓库地址
+git remote set-url origin http://192.168.100.235:9797/john/git_test.git
+
+方法二 通过命令先删除再添加远程仓库
+进入git_test根目录
+git remote 查看所有远程仓库， git remote xxx 查看指定远程仓库地址
+git remote <span class="nb">rm </span>origin
+git remote add origin http://192.168.100.235:9797/john/git_test.git
+</code></pre></div></div>
+
+<h1 id="切换到指定提交版本">切换到指定提交版本</h1>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 查看提交的tag标记 `commit 79713684715cb22ee261aef61e910018ade6112d`</span>
+git log 
+
+commit 79713684715cb22ee261aef61e910018ade6112d
+...
+<span class="c">#切换分支</span>
+
+git checkout 79713684715cb22ee261aef61e910018ade6112d
+</code></pre></div></div>
+
 <h1 id="使用git同时提交代码到两个source">使用git同时提交代码到两个source</h1>
 <ul>
   <li>ex:ijkplayer源码同时修改后提交到github和公司的gitserver</li>

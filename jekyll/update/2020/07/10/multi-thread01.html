@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>多线程(一)线程/进程/携程的基础知识 | poe Blog</title>
+<meta name="generator" content="Jekyll v3.8.7" />
+<meta property="og:title" content="多线程(一)线程/进程/携程的基础知识" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="多线程(一)线程/进程/携程的基础知识" />
+<meta property="og:description" content="多线程(一)线程/进程/携程的基础知识" />
+<link rel="canonical" href="http://localhost:4000/jekyll/update/2020/07/10/multi-thread01.html" />
+<meta property="og:url" content="http://localhost:4000/jekyll/update/2020/07/10/multi-thread01.html" />
+<meta property="og:site_name" content="poe Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-07-10T16:50:01+08:00" />
+<script type="application/ld+json">
+{"@type":"BlogPosting","headline":"多线程(一)线程/进程/携程的基础知识","dateModified":"2020-07-10T16:50:01+08:00","datePublished":"2020-07-10T16:50:01+08:00","url":"http://localhost:4000/jekyll/update/2020/07/10/multi-thread01.html","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/jekyll/update/2020/07/10/multi-thread01.html"},"description":"多线程(一)线程/进程/携程的基础知识","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="poe Blog" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">poe Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">多线程(一)线程/进程/携程的基础知识</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2020-07-10T16:50:01+08:00" itemprop="datePublished">Jul 10, 2020
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h1 id="多线程一线程进程携程的基础知识">多线程(一)线程/进程/携程的基础知识</h1>
+
+<p><img src="/assets/blog_res/1c55ba76.jpg" alt="01_01.jpg" /></p>
+
+<h2 id="1什么是线程">1.什么是线程</h2>
+
+<p><strong>基本概念</strong></p>
+
+<p>我们先从线程的基本概念开始，给大家复习一下，不知道有多少同学是基础不太好，说什么是线程都不知道的，如果这样的话，花时间去补初级内容的课。</p>
+
+<p><img src="/assets/blog_res/50599d48.jpg" alt="01_02.jpg" /></p>
+
+<p>什么是叫一个进程？ 什么叫一个线程？</p>
+
+<ul>
+  <li>
+    <p>Program app -&gt;QQ.exe</p>
+
+    <p><strong>进程：</strong>做一个简单的解释，你的硬盘上有一个简单的程序，这个程序叫QQ.exe，这是一个程序，这个程序是一个静态的概念，它被扔在硬盘上也没人理他，但是当你双击它，弹出一个界面输入账号密码登录进去了，OK，这个时候叫做一个进程。进程相对于程序来说它是一个动态的概念</p>
+
+    <p><strong>线程：</strong>作为一个进程里面最小的执行单元它就叫一个线程，用简单的话讲一个程序里不同的执行路径就叫做一个线程</p>
+  </li>
+</ul>
+
+<p><strong>示例：什么叫做线程</strong></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mashibing.juc.c_000</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.concurrent.TimeUnit</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">T01_WhatIsThread</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">T1</span> <span class="kd">extends</span> <span class="nc">Thread</span> <span class="o">{</span>
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+           <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">10</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+               <span class="k">try</span> <span class="o">{</span>
+                   <span class="nc">TimeUnit</span><span class="o">.</span><span class="na">MICROSECONDS</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+               <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                   <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+               <span class="o">}</span>
+               <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"T1"</span><span class="o">);</span>
+           <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//new T1().run();</span>
+        <span class="k">new</span> <span class="nf">T1</span><span class="o">().</span><span class="na">start</span><span class="o">();</span>
+        <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">10</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="nc">TimeUnit</span><span class="o">.</span><span class="na">MICROSECONDS</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="o">}</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"main"</span><span class="o">);</span>
+        <span class="o">}</span>
+
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p>观察上面程序的数据结果，你会看到字符串“T1”和“Main”的交替输出，这就是程序中有两条不同的执行路径在交叉执行，这就是直观概念上的线程，概念性的东西，理解就好，没有必要咬文嚼字的去背文字的定义。</p>
+
+<h2 id="2线程常用方法">2.线程常用方法</h2>
+
+<p><img src="/assets/blog_res/cbb89cd7.jpg" alt="01_03.jpg" />
+<strong>我们来认识几个线程的方法</strong></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mashibing.juc.c_000</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">T03_Sleep_Yield_Join</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+					<span class="c1">//testSleep();</span>
+					<span class="c1">//testYield();</span>
+        <span class="n">testJoin</span><span class="o">();</span>
+    <span class="o">}</span> 
+		<span class="cm">/*Sleep,意思就是睡眠，当前线程暂停一段时间让给别的线程去运行。Sleep是怎么复活的？由你的睡眠时间而定，等睡眠到规定的时间自动复活*/</span>
+    <span class="kd">static</span> <span class="kt">void</span> <span class="nf">testSleep</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">new</span> <span class="nf">Thread</span><span class="o">(()-&gt;{</span>
+            <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">100</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"A"</span> <span class="o">+</span> <span class="n">i</span><span class="o">);</span>
+                <span class="k">try</span> <span class="o">{</span>
+                    <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">500</span><span class="o">);</span>
+                    <span class="c1">//TimeUnit.Milliseconds.sleep(500)</span>
+                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}).</span><span class="na">start</span><span class="o">();</span>
+    <span class="o">}</span>
+		<span class="cm">/*Yield,就是当前线程正在执行的时候停止下来进入等待队列，回到等待队列里在系统的调度算法里头呢还是依然有可能把你刚回去的这个线程拿回来继续执行，当然，更大的可能性是把原来等待的那些拿出一个来执行，所以yield的意思是我让出一下CPU，后面你们能不能抢到那我不管*/</span>
+    <span class="kd">static</span> <span class="kt">void</span> <span class="nf">testYield</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">new</span> <span class="nf">Thread</span><span class="o">(()-&gt;{</span>
+            <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">100</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"A"</span> <span class="o">+</span> <span class="n">i</span><span class="o">);</span>
+                <span class="k">if</span><span class="o">(</span><span class="n">i</span><span class="o">%</span><span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="nc">Thread</span><span class="o">.</span><span class="na">yield</span><span class="o">();</span>
+
+
+            <span class="o">}</span>
+        <span class="o">}).</span><span class="na">start</span><span class="o">();</span>
+
+        <span class="k">new</span> <span class="nf">Thread</span><span class="o">(()-&gt;{</span>
+            <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">100</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"------------B"</span> <span class="o">+</span> <span class="n">i</span><span class="o">);</span>
+                <span class="k">if</span><span class="o">(</span><span class="n">i</span><span class="o">%</span><span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="nc">Thread</span><span class="o">.</span><span class="na">yield</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}).</span><span class="na">start</span><span class="o">();</span>
+    <span class="o">}</span>
+		<span class="cm">/*join， 意思就是在自己当前线程加入你调用Join的线程（），本线程等待。等调用的线程运行完了，自己再去执行。t1和t2两个线程，在t1的某个点上调用了t2.join,它会跑到t2去运行，t1等待t2运行完毕继续t1运行（自己join自己没有意义） */</span>
+    <span class="kd">static</span> <span class="kt">void</span> <span class="nf">testJoin</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">Thread</span> <span class="n">t1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(()-&gt;{</span>
+            <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">100</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"A"</span> <span class="o">+</span> <span class="n">i</span><span class="o">);</span>
+                <span class="k">try</span> <span class="o">{</span>
+                    <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">500</span><span class="o">);</span>
+                    <span class="c1">//TimeUnit.Milliseconds.sleep(500)</span>
+                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">});</span>
+
+        <span class="nc">Thread</span> <span class="n">t2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(()-&gt;{</span>
+
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="n">t1</span><span class="o">.</span><span class="na">join</span><span class="o">();</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="o">}</span>
+
+            <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">100</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"A"</span> <span class="o">+</span> <span class="n">i</span><span class="o">);</span>
+                <span class="k">try</span> <span class="o">{</span>
+                    <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">500</span><span class="o">);</span>
+                    <span class="c1">//TimeUnit.Milliseconds.sleep(500)</span>
+                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">});</span>
+
+        <span class="n">t1</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        <span class="n">t2</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h2 id="3启动线程的五种方式">3.启动线程的五种方式</h2>
+
+<p><strong>创建线程的几种方式</strong></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mashibing.juc.c_000</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.concurrent.Callable</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.concurrent.ExecutorService</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.concurrent.Executors</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.concurrent.FutureTask</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">T02_HowToCreateThread</span> <span class="o">{</span>
+    <span class="kd">static</span> <span class="kd">class</span> <span class="nc">MyThread</span> <span class="kd">extends</span> <span class="nc">Thread</span> <span class="o">{</span>
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Hello MyThread!"</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="kd">static</span> <span class="kd">class</span> <span class="nc">MyRun</span> <span class="kd">implements</span> <span class="nc">Runnable</span> <span class="o">{</span>
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Hello MyRun!"</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="kd">static</span> <span class="kd">class</span> <span class="nc">MyCall</span> <span class="kd">implements</span> <span class="nc">Callable</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="o">{</span>
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="nc">String</span> <span class="nf">call</span><span class="o">()</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Hello MyCall"</span><span class="o">);</span>
+            <span class="k">return</span> <span class="s">"success"</span><span class="o">;</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="c1">//启动线程的5种方式</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">new</span> <span class="nf">MyThread</span><span class="o">().</span><span class="na">start</span><span class="o">();</span>
+        <span class="k">new</span> <span class="nf">Thread</span><span class="o">(</span><span class="k">new</span> <span class="nc">MyRun</span><span class="o">()).</span><span class="na">start</span><span class="o">();</span>
+        <span class="k">new</span> <span class="nf">Thread</span><span class="o">(()-&gt;{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Hello Lambda!"</span><span class="o">);</span>
+        <span class="o">}).</span><span class="na">start</span><span class="o">();</span>
+
+        <span class="nc">Thread</span> <span class="n">t</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(</span><span class="k">new</span> <span class="nc">FutureTask</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;(</span><span class="k">new</span> <span class="nc">MyCall</span><span class="o">()));</span>
+        <span class="n">t</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+
+        <span class="nc">ExecutorService</span> <span class="n">service</span> <span class="o">=</span> <span class="nc">Executors</span><span class="o">.</span><span class="na">newCachedThreadPool</span><span class="o">();</span>
+        <span class="n">service</span><span class="o">.</span><span class="na">execute</span><span class="o">(()-&gt;{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Hello ThreadPool"</span><span class="o">);</span>
+        <span class="o">});</span>
+        <span class="n">service</span><span class="o">.</span><span class="na">shutdown</span><span class="o">();</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p><strong>分享一道面试题</strong></p>
+
+<p>请你告诉我启动线程的三种方式 ?
+你说第一个：new Thread().start()； 第二个: new Thread(Runnable).start() 这没问题 ；那第三个呢，要回答线程池也是用的这两种之一，他这么问有些吹毛求疵的意思，你就可以说通过线程池也可以启动一个新的线程 3:Executors.newCachedThreadPool()或者FutureTask + Callable</p>
+
+<h2 id="4线程同步的基本概念">4.线程同步的基本概念</h2>
+
+<p><strong>synchronized</strong></p>
+
+<p>下面我们来讲synchronized关键字，有不少同学已经耳熟能详了，不过作为复习还是要复习一下。第一个是多个线程去访问同一个资源的时候对这个资源上锁。</p>
+
+<p>为什么要上锁呢？访问某一段代码或者某临界资源的时候是需要有一把锁的概念在这儿的。
+<img src="/assets/blog_res/f4dcae7d.jpg" alt="01_04.jpg" /></p>
+
+<p>比如：我们对一个数字做递增，两个程序对它一块儿来做递增，递增就是把一个程序往上加1啊，如果两个线程共同访问的时候，第一个线程一读它是0，然后把它加1，在自己线程内部内存里面算还没有写回去的时候而第二个线程读到了它还是0，加1在写回去，本来加了两次，但还是1，那么我们在对这个数字递增的过程当中就上把锁，就是说第一个线程对这个数字访问的时候是独占的，不允许别的线程来访问，不允许别的线程来对它计算，我必须加完1收释放锁，其他线程才能对它继续加。</p>
+
+<p>实质上，这把锁并不是对数字进行锁定的， 你可以任意指定，想锁谁就锁谁。</p>
+
+<p>我第一个小程序是这么写的 ，如果说你想上了把锁之后才能对count进行减减访问，你可以new一个Object，所以这里锁定就是o，当我拿到这把锁的时候才能执行这段代码。是锁定的某一个对象，synchronized有一个锁升级的概念，我们一会儿会讲到</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+*synchronized关键字
+*对某个对象加锁
+*@author mashibing
+*/</span>
+<span class="kn">package</span> <span class="nn">com.mashibing.juc.c_001</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">T</span> <span class="o">{</span>
+	
+	<span class="kd">private</span> <span class="kt">int</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">10</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">Object</span> <span class="n">o</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Object</span><span class="o">();</span>
+	
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">m</span><span class="o">()</span> <span class="o">{</span>
+		<span class="kd">synchronized</span><span class="o">(</span><span class="n">o</span><span class="o">)</span> <span class="o">{</span> <span class="c1">//任何线程要想执行下面的代码，必须先拿到o的锁</span>
+			<span class="n">count</span><span class="o">--;</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">()</span> <span class="o">+</span> <span class="s">" count = "</span> <span class="o">+</span> <span class="n">count</span><span class="o">);</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+	
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>我们来谈一下synchronized它的一些特性。如果说你每次都定义个一个锁的对象Object o 把它new出来那加锁的时候太麻烦每次都要new一个新的对象出来，所以呢，有一个简单的方式就是<strong>synchronized(this)</strong>锁定当前对象就行</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * synchronized关键字
+ * 对某个对象加锁
+ * @author mashibing
+ */</span>
+<span class="kn">package</span> <span class="nn">com.mashibing.juc.c_002</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">T</span> <span class="o">{</span>
+	
+	<span class="kd">private</span> <span class="kt">int</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">10</span><span class="o">;</span>
+	
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">m</span><span class="o">()</span> <span class="o">{</span>
+		<span class="kd">synchronized</span><span class="o">(</span><span class="k">this</span><span class="o">)</span> <span class="o">{</span> <span class="err">߳</span><span class="c1">//任何线程想要执行那个下面的代码，必须先要拿到this的锁</span>
+      <span class="n">count</span><span class="o">--;</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">()</span> <span class="o">+</span> <span class="s">" count = "</span> <span class="o">+</span> <span class="n">count</span><span class="o">);</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+	
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>如果你要是锁定当前对象呢，你也可以写成如下方法。synchronized方法和synchronized(this)执行这段代码它是等值的</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mashibing.juc.c_003</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">T</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="kt">int</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">10</span><span class="o">;</span>
+	
+	<span class="kd">public</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">m</span><span class="o">()</span> <span class="o">{</span> <span class="c1">//等同于在方法的代码执行时要synchronized(this)</span>
+		<span class="n">count</span><span class="o">--;</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">()</span> <span class="o">+</span> <span class="s">" count = "</span> <span class="o">+</span> <span class="n">count</span><span class="o">);</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p>我们知道静态方法static是没有this对象的，你不需要new出一个对象来就能执行这个方法，但如果这个这个上面加一个synchronized的话就代表synchronized(T.class)。这里这个synchronized(T.class)锁的就是T类的对象</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mashibing.juc.c_004</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">T</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kt">int</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">10</span><span class="o">;</span>
+	
+	<span class="kd">public</span> <span class="kd">synchronized</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">m</span><span class="o">()</span> <span class="o">{</span> <span class="c1">//这里等同于synchronized(T.class)</span>
+		<span class="n">count</span><span class="o">--;</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">()</span> <span class="o">+</span> <span class="s">" count = "</span> <span class="o">+</span> <span class="n">count</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">mm</span><span class="o">()</span> <span class="o">{</span>
+		<span class="kd">synchronized</span><span class="o">(</span><span class="no">T</span><span class="o">.</span><span class="na">class</span><span class="o">)</span> <span class="o">{</span> <span class="c1">//考虑一下这里写synchronized(this)是否可以？</span>
+			<span class="n">count</span> <span class="o">--;</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p><strong>问题：T.class是单例的吗？</strong></p>
+
+<p>一个class load到内存它是不是单例的，想想看。一般情况下是，如果是在同一个ClassLoader空间那它一定是。不是同一个类加载器就不是了，不同的类加载器互相之间也不能访问。所以说你能访问它，那他一定就是单例</p>
+
+<p>下面程序：很有可能读不到别的线程修改过的内容，除了这点之外count减减完了之后下面的count输出和你减完的结果不对，很容易分析：如果有一个线程把它从10减到9了，然后又有一个线程在前面一个线程还没有输出呢进来了把9又减到了8，继续输出的8，而不是9。如果你想修正它，前面第一个是在上面加volatile，改了马上就能得到。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 分析一下这个程序的输出
+ * @author mashibing
+ */</span>
+<span class="kn">package</span> <span class="nn">com.mashibing.juc.c_005</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">T</span> <span class="kd">implements</span> <span class="nc">Runnable</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="cm">/*volatile*/</span> <span class="kt">int</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">100</span><span class="o">;</span>
+	
+	<span class="kd">public</span> <span class="cm">/*synchronized*/</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span> 
+		<span class="n">count</span><span class="o">--;</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">()</span> <span class="o">+</span> <span class="s">" count = "</span> <span class="o">+</span> <span class="n">count</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="no">T</span> <span class="n">t</span> <span class="o">=</span> <span class="k">new</span> <span class="no">T</span><span class="o">();</span>
+		<span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">100</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+			<span class="k">new</span> <span class="nf">Thread</span><span class="o">(</span><span class="n">t</span><span class="o">,</span> <span class="s">"THREAD"</span> <span class="o">+</span> <span class="n">i</span><span class="o">).</span><span class="na">start</span><span class="o">();</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+	
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p>另外这个之外还可以加synchronized，加了synchronized就没有必要在加volatile了，因为synchronized既保证了原子性，又保证了可见性。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//对比上一个小程序</span>
+<span class="kn">package</span> <span class="nn">com.mashibing.juc.c_006</span><span class="o">;</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">T</span> <span class="kd">implements</span> <span class="nc">Runnable</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="kt">int</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">10</span><span class="o">;</span>
+	
+	<span class="kd">public</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span> 
+		<span class="n">count</span><span class="o">--;</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">()</span> <span class="o">+</span> <span class="s">" count = "</span> <span class="o">+</span> <span class="n">count</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		
+		<span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">5</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+			<span class="no">T</span> <span class="n">t</span> <span class="o">=</span> <span class="k">new</span> <span class="no">T</span><span class="o">();</span>
+			<span class="k">new</span> <span class="nf">Thread</span><span class="o">(</span><span class="n">t</span><span class="o">,</span> <span class="s">"THREAD"</span> <span class="o">+</span> <span class="n">i</span><span class="o">).</span><span class="na">start</span><span class="o">();</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+	
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p>如下代码：同步方法和非同步方法是否可以同时调用？就是我有一个synchronized的m1方法，我调用m1的时候能不能调用m2，拿大腿想一想这个是肯定可以的，线程里面访问m1的时候需要加锁，可是访问m2的时候我又不需要加锁，所以允许执行m2。</p>
+
+<p>这些小实验的设计是比较考验功力的，学习线程的时候自己要多动手进行试验，任何一个理论，都可以进行验证。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ *同步和非同步方法是否可以同时调用？
+ * @author mashibing
+ */</span>
+<span class="kn">package</span> <span class="nn">com.mashibing.juc.c_007</span><span class="o">;</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">T</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">m1</span><span class="o">()</span> <span class="o">{</span> 
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">()</span> <span class="o">+</span> <span class="s">" m1 start..."</span><span class="o">);</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">10000</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">()</span> <span class="o">+</span> <span class="s">" m1 end"</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">m2</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">5000</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">()</span> <span class="o">+</span> <span class="s">" m2 "</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="no">T</span> <span class="n">t</span> <span class="o">=</span> <span class="k">new</span> <span class="no">T</span><span class="o">();</span>
+		
+		<span class="cm">/*new Thread(()-&gt;t.m1(), "t1").start();
+		new Thread(()-&gt;t.m2(), "t2").start();*/</span>
+		
+		<span class="k">new</span> <span class="nf">Thread</span><span class="o">(</span><span class="nl">t:</span><span class="o">:</span><span class="n">m1</span><span class="o">,</span> <span class="s">"t1"</span><span class="o">).</span><span class="na">start</span><span class="o">();</span>
+		<span class="k">new</span> <span class="nf">Thread</span><span class="o">(</span><span class="nl">t:</span><span class="o">:</span><span class="n">m2</span><span class="o">,</span> <span class="s">"t2"</span><span class="o">).</span><span class="na">start</span><span class="o">();</span>
+		
+		<span class="cm">/*
+		//1.8之前的写法
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				t.m1();
+			}
+		});
+		*/</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+
+</code></pre></div></div>
+
+<p>我们在来看一个synchronized应用的例子</p>
+
+<p>我们定义了一个class账户，有名称、余额。写方法给哪个用户设置它多少余额，读方法通过这个名字得到余额值。如果我们给写方法加锁，给读方法不加锁，你的业务允许产生这种问题吗？业务说我中间读到了一些不太好的数据也没关系，如果不允许客户读到中间不好的数据那这个就有问题。正因为我们加了锁的方法和不加锁的方法可以同时运行。</p>
+
+<p><strong>问题</strong>比如说：张三，给他设置100块钱启动了，睡了1毫秒之后呢去读它的值，然后再睡2秒再去读它的值这个时候你会看到读到的值有问题，原因是在设定的过程中this.name你中间睡了一下，这个过程当中我模拟了一个线程来读，这个时候调用的是getBalance方法，而调用这个方法的时候是不用加锁的，所以说我不需要等你整个过程执行完就可以读到你中间结果产生的内存，这个现象就叫做脏读。这问题的产生就是synchronized方法和非synchronized方法是同时运行的。<strong>解决</strong>就是把getBalance加上synchronized就可以了，如果你的业务允许脏读，就可以不用加锁，加锁之后的效率低下。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 面试题：模拟银行账户
+ * 对业务写方法加锁
+ * 对业务读方法不加锁
+ * 这样行不行？
+ *
+ * 容易产生脏读问题（dirtyRead）
+ */</span>
+<span class="kn">package</span> <span class="nn">com.mashibing.juc.c_008</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.concurrent.TimeUnit</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Account</span> <span class="o">{</span>
+	<span class="nc">String</span> <span class="n">name</span><span class="o">;</span>
+	<span class="kt">double</span> <span class="n">balance</span><span class="o">;</span>
+	
+	<span class="kd">public</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">set</span><span class="o">(</span><span class="nc">String</span> <span class="n">name</span><span class="o">,</span> <span class="kt">double</span> <span class="n">balance</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">;</span>
+
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">2000</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+		
+		<span class="k">this</span><span class="o">.</span><span class="na">balance</span> <span class="o">=</span> <span class="n">balance</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	<span class="kd">public</span> <span class="cm">/*synchronized*/</span> <span class="kt">double</span> <span class="nf">getBalance</span><span class="o">(</span><span class="nc">String</span> <span class="n">name</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="k">this</span><span class="o">.</span><span class="na">balance</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">Account</span> <span class="n">a</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Account</span><span class="o">();</span>
+		<span class="k">new</span> <span class="nf">Thread</span><span class="o">(()-&gt;</span><span class="n">a</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="s">"zhangsan"</span><span class="o">,</span> <span class="mf">100.0</span><span class="o">)).</span><span class="na">start</span><span class="o">();</span>
+		
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">a</span><span class="o">.</span><span class="na">getBalance</span><span class="o">(</span><span class="s">"zhangsan"</span><span class="o">));</span>
+		
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">a</span><span class="o">.</span><span class="na">getBalance</span><span class="o">(</span><span class="s">"zhangsan"</span><span class="o">));</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+
+</code></pre></div></div>
+
+<p>再来看synchronized的另外一个属性：可重入，是synchronized必须了解的一个概念。</p>
+
+<p>如果是一个同步方法调用另外一个同步方法，有一个方法加了锁，另外一个方法也需要加锁，加的是同一把锁也是同一个线程，那这个时候申请仍然会得到该对象的锁。比如说是synchronized可重入的，有一个方法m1 是synchronized有一个方法m2也是synchrionzed，m1里能不能调m2。我们m1开始的时候这个线程得到了这把锁，然后在m1里面调用m2，如果说这个时候不允许任何线程再来拿这把锁的时候就死锁了。这个时候调m2它发现是同一个线程，因为你m2也需要申请这把锁，它发现是同一个线程申请的这把锁，允许，可以没问题，这就叫可重入锁。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 一个同步方法可以调用另外一个同步方法，一个线程已经拥有某个对象的锁，再次申请的时候仍然会得到该对象的锁。
+ * 也就是说synchronized获得锁是可重入的
+ * synchronized
+ * @author mashibing
+ */</span>
+<span class="kn">package</span> <span class="nn">com.mashibing.juc.c_009</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.concurrent.TimeUnit</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">T</span> <span class="o">{</span>
+	<span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">m1</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"m1 start"</span><span class="o">);</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+		<span class="n">m2</span><span class="o">();</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"m1 end"</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+	<span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">m2</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"m2"</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">new</span> <span class="nf">T</span><span class="o">().</span><span class="na">m1</span><span class="o">();</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p>模拟一个父类子类的概念，父类synchronized，子类调用super.m的时候必须得可重入，否则就会出问题（调用父类是同一把锁）。所谓的重入锁就是你拿到这把锁之后不停加锁加锁，加好几道，但锁定的还是同一个对象，去一道就减个1，就是这么个概念。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mashibing.juc.c_010</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.concurrent.TimeUnit</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">T</span> <span class="o">{</span>
+	<span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">m</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"m start"</span><span class="o">);</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"m end"</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">new</span> <span class="nf">TT</span><span class="o">().</span><span class="na">m</span><span class="o">();</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+<span class="kd">class</span> <span class="nc">TT</span> <span class="kd">extends</span> <span class="no">T</span> <span class="o">{</span>
+	<span class="nd">@Override</span>
+	<span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">m</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"child m start"</span><span class="o">);</span>
+		<span class="kd">super</span><span class="o">.</span><span class="na">m</span><span class="o">();</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"child m end"</span><span class="o">);</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p>友联 &amp; 相关开源项目源码出处.</p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/PPlayer">GitHub - jdpxiaoming/PPlayer: ffmpeg 4.0.2静态库从0开始一个播放器的搭建，支持rtmp、rtsp、hls、本地MP4文件播放，音视频同步，直播推流</a></p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/ijkrtspdemo">GitHub - jdpxiaoming/ijkrtspdemo: ijkplayer open the rtsp &amp; h265 surpport android demo .</a></p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/FFmpegTools/">GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.</a></p>
+  </li>
+</ul>
+
+
+  </div><a class="u-url" href="/jekyll/update/2020/07/10/multi-thread01.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">poe Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">poe Blog</li><li><a class="u-email" href="mailto:302940116@qq.com">302940116@qq.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">jdpxiaoming</span></a></li><li><a href="https://www.twitter.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">jdpxiaoming</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>不积跬步无以至千里，先从一篇blog出发， 归纳总结出一个多媒体安卓工程师的技术轨迹。</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
