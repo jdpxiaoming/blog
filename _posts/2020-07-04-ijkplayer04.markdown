@@ -1,0 +1,79 @@
+---
+layout: post
+title:  "ijkplayer编译修改so名字"
+date:   2020-07-04 16:50:01 +0800
+categories: jekyll update
+---
+ijkplayer编译修改so名字
+===
+
+
+- 修改libijkffmepg->libijkwdzffmpeg
+  - 打开 `\ijkplayer\android\contrib\tools\do-compile-ffmpeg.sh`
+  - 修改 `ijkffmpeg` -> `ijkwdzffmpeg`
+
+```c
+#349 line .
+$CC -lm -lz -shared --sysroot=$FF_SYSROOT -Wl,--no-undefined -Wl,-z,noexecstack $FF_EXTRA_LDFLAGS \
+    -Wl,-soname,libijkwdzffmpeg.so \
+    $FF_C_OBJ_FILES \
+    $FF_ASM_OBJ_FILES \
+    $FF_DEP_LIBS \
+    -o $FF_PREFIX/libijkwdzffmpeg.so
+    
+# 372 line 
+ln -s $FF_PREFIX/libijkffmpeg.so $FF_PREFIX/shared/lib/libijkwdzffmpeg.so
+
+```
+
+- 修改编译的安卓对应项目中`Android.mk`脚本
+- 修改`E:\源码阅读\ijkplayer\android\ijkplayer\ijkplayer-armv7a\src\main\jni\ffmpeg\Android.mk`
+- `E:\源码阅读\ijkplayer\android\ijkplayer\ijkplayer-armv64\src\main\jni\ffmpeg\Android.mk`
+- `E:\源码阅读\ijkplayer\android\ijkplayer\ijkplayer-x86\...\`
+- `E:\源码阅读\ijkplayer\android\ijkplayer\ijkplayer-armv-x86_64\src\main\jni\ffmpeg\Android.mk`
+
+
+```cmake
+LOCAL_PATH := $(call my-dir)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := ijkwdzffmpeg
+LOCAL_SRC_FILES := $(MY_APP_FFMPEG_OUTPUT_PATH)/libijkwdzffmpeg.so
+include $(PREBUILT_SHARED_LIBRARY)
+```
+
+
+
+- libijksdl的配置文件`E:\源码阅读\ijkplayer\ijkmedia\ijksdl\Android.mk`
+
+```c
+# 75 line.
+LOCAL_SHARED_LIBRARIES := ijkwdzffmpeg
+LOCAL_STATIC_LIBRARIES := cpufeatures yuv_static ijkj4a
+# 如果需要修改sdl把下面名字改掉，然后load jni的地方也同步改下. 
+LOCAL_MODULE := ijk**sdl 
+```
+
+- `libijkrtsp`修改`E:\源码阅读\ijkplayer\ijkmedia\ijkplayer\Android.mk`
+
+```c
+#78 line.
+LOCAL_SHARED_LIBRARIES := ijkwdzffmpeg ijk**sdl
+LOCAL_STATIC_LIBRARIES := android-ndk-profiler ijksoundtouch
+
+LOCAL_MODULE := ijkplayer
+```
+
+- 重新编译参考我之前的文章
+
+[ijkplayer编译2020 Centos 7 & Ubuntu18.04.1 \| poe Blog](https://blog.lxfpoe.work/jekyll/update/2020/06/11/ijkplayer-compiler.html)
+
+
+- 友联 & 相关开源项目源码出处. 
+
+- [GitHub - jdpxiaoming/PPlayer: ffmpeg 4.0.2静态库从0开始一个播放器的搭建，支持rtmp、rtsp、hls、本地MP4文件播放，音视频同步，直播推流](https://github.com/jdpxiaoming/PPlayer)
+
+- [GitHub - jdpxiaoming/ijkrtspdemo: ijkplayer open the rtsp & h265 surpport android demo .](https://github.com/jdpxiaoming/ijkrtspdemo)
+
+- [GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.](https://github.com/jdpxiaoming/FFmpegTools/)
+

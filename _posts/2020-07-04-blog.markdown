@@ -1,0 +1,160 @@
+---
+layout: post
+title:  "GihubPage个人博客搭建2020/04/28成功. "
+date:   2020-07-04 16:59:01 +0800
+categories: jekyll update
+---
+GihubPage个人博客搭建2020/04/28成功. 
+===
+
+
+- 依赖项目[PPlayer](https://jdpxiaoming.github.io/PPlayer/)
+
+
+## 1. 直接在项目中选择开通`GithubPage`选择master分支
+
+
+# 安装`Jekyll`方便协作博客内容.[传送](https://jekyllcn.com/docs/github-pages/)
+- 安装[rubyinstall+devkit-2.6.6.1-x64.exe](https://pan.baidu.com/s/1hKtqqBH65js5kNsjJXbDaA)
+- 提取码：`n7zd`
+- 下载RubyGems 
+
+### 修改ruby的源为国内的镜像：淘宝镜像(http://mirrors.aliyun.com/rubygems/)或者ruby中国镜像(https://gems.ruby-china.org/)。
+
+```shell
+gem sources --add http://mirrors.aliyun.com/rubygems/ --remove https://rubygems.org/
+gem sources -l
+```
+
+- 在Windows下，如果出现证书失败，就去下载一个证书
+
+```shell
+curl http://curl.haxx.se/ca/cacert.pem -o cacert.pem
+```
+- 将下载的cacert.pem移到ruby安装目录的/bin这个目录下，并且在系统环境变量中新建SSL_CERT_FILE，值为刚才的/bin目录的绝对路径，管理员权限打开cmd/PowerShell
+
+
+```
+SETX /M SSL_CERT_FILE "C:\Ruby26-x64\bin"
+```
+
+### Install Jekyll and bundler gems. 关闭代理等待一会，走aliyun的链接可以完成安装. 
+
+```shell
+gem install jekyll bundler
+```
+- 查看jekyll版本:`jekyll -v`
+
+![f7a128fa.png](/assets/blog_res/f7a128fa.png)
+
+
+### 建立一个demo网站
+
+```
+jekyll new my-awesome-site
+
+cd my-awesome-site
+
+bundle exec jekyll serve
+
+# => Now browse to http://localhost:4000
+
+单独安装依赖：bundle install //还是需要开个系统全局的代理才能成功. 
+```
+
+### 编辑器推荐`Vs Code`
+
+![36134f32.png](/assets/blog_res/36134f32.png)
+
+
+## 修改Gemfile文件
+
+```js
+source 'http://mirrors.aliyun.com/rubygems/' # 更改gem源可能要设置环境变量
+# gem "jekyll", "~> 4.0.0"# 注释掉这行
+gem 'github-pages', group: :jekyll_plugins # 去掉这行的注释井号#
+
+# 更新jekyll
+bundle update 
+
+```
+
+
+## 初始化本地站点仓库
+
+```
+cd blog
+git init
+git remote add origin git@github.com:userName/blog.git # 与你的github blog仓库建立联系
+git checkout --orphan gh-pages
+```
+
+## 配置静态站点到origin/gh-pages分支下
+
+```shell
+cd _site # 切换到_site目录
+git init
+git remote add origin git@github.com:jdpxiaoming/blog.git # 与同意github blog仓库建立联系
+git checkout -b gh-pages
+```
+
+## git 删除远程分支
+
+```shell
+git branch -ｒ
+使用下面两条命令来删除远程分支
+git branch -r -d origin/branch-name
+git push origin :branch-name
+```
+
+## 生成编译后的静态站点文件，并且push到远程仓库
+
+```shell
+jekyll build
+cd _site
+git add --all
+#如果有CNAME需要删除
+rm CNAME
+
+git commit -m 'some descriptions'
+
+git push origin gh-pages
+```
+
+- 错误：`fatal: refusing to merge unrelated histories`
+
+```shell
+git pull origin gh-pages --allow-unrelated-histories
+```
+
+## 部署-githubk-setting-Githubpages
+
+## 设置阿里云解析倒`Github`
+
+```groovy
+ Ping jdpxiaoming.github.io [185.199.110.153]
+
+ #域名绑定
+blog.lxfpoe.work  
+```
+
+## 上面的域名解析有问题githubpage的ip地址每天会变，使用CName配置文件来解决
+- 默认项目下面会生成CNAME，没有自己建一个 
+
+- 第一行写入 `blog.lxfpoe.work`
+ 阿里云解析注意使用CNAME类型不要直接绑定ip
+- 选择CNAME
+
+![baf74130.png](/assets/blog_res/baf74130.png)
+
+
+- [我的小站](https://blog.lxfpoe.work/) https://blog.lxfpoe.work/
+
+- 友联 & 相关开源项目源码出处. 
+
+- [GitHub - jdpxiaoming/PPlayer: ffmpeg 4.0.2静态库从0开始一个播放器的搭建，支持rtmp、rtsp、hls、本地MP4文件播放，音视频同步，直播推流](https://github.com/jdpxiaoming/PPlayer)
+
+- [GitHub - jdpxiaoming/ijkrtspdemo: ijkplayer open the rtsp & h265 surpport android demo .](https://github.com/jdpxiaoming/ijkrtspdemo)
+
+- [GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.](https://github.com/jdpxiaoming/FFmpegTools/)
+

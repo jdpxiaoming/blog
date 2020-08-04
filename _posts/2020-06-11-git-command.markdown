@@ -7,6 +7,33 @@ categories: jekyll update
 Git常用语法
 ===
 
+# 修改远程地址库
+```shell
+方法一
+进入git_test根目录
+git remote 查看所有远程仓库， git remote xxx 查看指定远程仓库地址
+git remote set-url origin http://192.168.100.235:9797/john/git_test.git
+
+方法二 通过命令先删除再添加远程仓库
+进入git_test根目录
+git remote 查看所有远程仓库， git remote xxx 查看指定远程仓库地址
+git remote rm origin
+git remote add origin http://192.168.100.235:9797/john/git_test.git
+```
+
+
+# 切换到指定提交版本
+```shell
+# 查看提交的tag标记 `commit 79713684715cb22ee261aef61e910018ade6112d`
+git log 
+
+commit 79713684715cb22ee261aef61e910018ade6112d
+...
+#切换分支
+
+git checkout 79713684715cb22ee261aef61e910018ade6112d
+```
+
 
 # 使用git同时提交代码到两个source
 - ex:ijkplayer源码同时修改后提交到github和公司的gitserver
