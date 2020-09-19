@@ -1,0 +1,379 @@
+---
+layout: post
+title:  "ijkplayer开启视频同步"
+date:   2020-09-19 14:27:01 +0800
+categories: jekyll update
+---
+ijkplayer开启视频同步
+===
+
+- `ijkmedia/ijkplayer/ff_ffplay.c#1320`
+
+```c
+/* called to display each frame */
+/**
+* 音视频同步
+* commented by poe.Cai 2020/09/08
+* 
+*/
+static void video_refresh(FFPlayer *opaque, double *remaining_time)
+{
+    FFPlayer *ffp = opaque;
+    VideoState *is = ffp->is;
+    double time;
+
+    Frame *sp, *sp2;
+
+	//synchronize to an external clock 
+	//与外部时钟同步
+    if (!is->paused && get_master_sync_type(is) == AV_SYNC_EXTERNAL_CLOCK && is->realtime)
+        check_external_clock_speed(is);
+
+    if (!ffp->display_disable && is->show_mode != SHOW_MODE_VIDEO && is->audio_st) {
+        time = av_gettime_relative() / 1000000.0;
+        if (is->force_refresh || is->last_vis_time + ffp->rdftspeed < time) {
+            video_display2(ffp);
+            is->last_vis_time = time;
+        }
+        *remaining_time = FFMIN(*remaining_time, is->last_vis_time + ffp->rdftspeed - time);
+    }
+
+    if (is->video_st) {
+retry:
+        if (frame_queue_nb_remaining(&is->pictq) == 0) {
+            // nothing to do, no picture to display in the queue
+        } else {
+            double last_duration, duration, delay;
+            Frame *vp, *lastvp;
+
+            /* dequeue the picture */
+            lastvp = frame_queue_peek_last(&is->pictq);
+            vp = frame_queue_peek(&is->pictq);
+
+            if (vp->serial != is->videoq.serial) {
+                frame_queue_next(&is->pictq);
+                goto retry;
+            }
+
+            if (lastvp->serial != vp->serial)
+                is->frame_timer = av_gettime_relative() / 1000000.0;
+
+            if (is->paused)
+                goto display;
+
+            /* compute nominal last_duration */
+            last_duration = vp_duration(is, lastvp, vp, ffp->delay_forbidden);
+            delay = compute_target_delay(ffp, last_duration, is);
+
+            time= av_gettime_relative()/1000000.0;
+            if (isnan(is->frame_timer) || time < is->frame_timer)
+                is->frame_timer = time;
+            if (time < is->frame_timer + delay) {
+                *remaining_time = FFMIN(is->frame_timer + delay - time, *remaining_time);
+                goto display;
+            }
+
+            is->frame_timer += delay;
+            if (delay > 0 && time - is->frame_timer > AV_SYNC_THRESHOLD_MAX)
+                is->frame_timer = time;
+
+            SDL_LockMutex(is->pictq.mutex);
+            if (!isnan(vp->pts))
+                update_video_pts(is, vp->pts, vp->pos, vp->serial);
+            SDL_UnlockMutex(is->pictq.mutex);
+
+            if (frame_queue_nb_remaining(&is->pictq) > 1) {
+                Frame *nextvp = frame_queue_peek_next(&is->pictq);
+				//增加参数, ffp->delay_forbidden
+                duration = vp_duration(is, vp, nextvp, ffp->delay_forbidden);
+                if(!is->step && (ffp->framedrop > 0 || (ffp->framedrop && get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) && time > is->frame_timer + duration) {
+                    frame_queue_next(&is->pictq);
+                    goto retry;
+                }
+            }
+
+            if (is->subtitle_st) {
+                while (frame_queue_nb_remaining(&is->subpq) > 0) {
+                    sp = frame_queue_peek(&is->subpq);
+
+                    if (frame_queue_nb_remaining(&is->subpq) > 1)
+                        sp2 = frame_queue_peek_next(&is->subpq);
+                    else
+                        sp2 = NULL;
+
+                    if (sp->serial != is->subtitleq.serial
+                            || (is->vidclk.pts > (sp->pts + ((float) sp->sub.end_display_time / 1000)))
+                            || (sp2 && is->vidclk.pts > (sp2->pts + ((float) sp2->sub.start_display_time / 1000))))
+                    {
+                        if (sp->uploaded) {
+                            ffp_notify_msg4(ffp, FFP_MSG_TIMED_TEXT, 0, 0, "", 1);
+                        }
+                        frame_queue_next(&is->subpq);
+                    } else {
+                        break;
+                    }
+                }
+            }
+
+            frame_queue_next(&is->pictq);
+            is->force_refresh = 1;
+
+            SDL_LockMutex(ffp->is->play_mutex);
+            if (is->step) {
+                is->step = 0;
+                if (!is->paused)
+                    stream_update_pause_l(ffp);
+            }
+            SDL_UnlockMutex(ffp->is->play_mutex);
+        }
+display:
+        /* display picture */
+        if (!ffp->display_disable && is->force_refresh && is->show_mode == SHOW_MODE_VIDEO && is->pictq.rindex_shown)
+            video_display2(ffp);
+    }
+    is->force_refresh = 0;
+    if (ffp->show_status) {
+        static int64_t last_time;
+        int64_t cur_time;
+        int aqsize, vqsize, sqsize __unused;
+        double av_diff;
+
+        cur_time = av_gettime_relative();
+        if (!last_time || (cur_time - last_time) >= 30000) {
+            aqsize = 0;
+            vqsize = 0;
+            sqsize = 0;
+            if (is->audio_st)
+                aqsize = is->audioq.size;
+            if (is->video_st)
+                vqsize = is->videoq.size;
+#ifdef FFP_MERGE
+            if (is->subtitle_st)
+                sqsize = is->subtitleq.size;
+#else
+            sqsize = 0;
+#endif
+            av_diff = 0;
+            if (is->audio_st && is->video_st)
+                av_diff = get_clock(&is->audclk) - get_clock(&is->vidclk);
+            else if (is->video_st)
+                av_diff = get_master_clock(is) - get_clock(&is->vidclk);
+            else if (is->audio_st)
+                av_diff = get_master_clock(is) - get_clock(&is->audclk);
+            av_log(NULL, AV_LOG_INFO,
+                   "%7.2f %s:%7.3f fd=%4d aq=%5dKB vq=%5dKB sq=%5dB f=%"PRId64"/%"PRId64"   \r",
+                   get_master_clock(is),
+                   (is->audio_st && is->video_st) ? "A-V" : (is->video_st ? "M-V" : (is->audio_st ? "M-A" : "   ")),
+                   av_diff,
+                   is->frame_drops_early + is->frame_drops_late,
+                   aqsize / 1024,
+                   vqsize / 1024,
+                   sqsize,
+                   is->video_st ? is->viddec.avctx->pts_correction_num_faulty_dts : 0,
+                   is->video_st ? is->viddec.avctx->pts_correction_num_faulty_pts : 0);
+            fflush(stdout);
+            last_time = cur_time;
+        }
+    }
+}
+
+```
+
+- 相关的数据结构参考我的上面两篇文章
+- [IikPlayer frame queue分析](https://blog.lxfpoe.work/jekyll/update/2020/09/19/ijkplayer05.html)
+- [IikPlayer packet queue分析](https://blog.lxfpoe.work/jekyll/update/2020/09/19/ijkplayer04.html)
+
+
+- 主要计算音视频时间的方法`ff_ffplay.c#1253/compute_target_delay`
+
+```c
+
+//计算合适的延迟时间. 
+//时钟同步，主要的视频同步到音频做的追赶和等待逻辑. 
+static double compute_target_delay(FFPlayer *ffp, double delay, VideoState *is)
+{
+    double sync_threshold, diff = 0;
+
+    /* update delay to follow master synchronisation source */
+    if (get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER) {
+        /* if video is slave, we try to correct big delays by
+           duplicating or deleting a frame */
+        diff = get_clock(&is->vidclk) - get_master_clock(is);
+
+        /* skip or repeat frame. We take into account the
+           delay to compute the threshold. I still don't know
+           if it is the best guess */
+        sync_threshold = FFMAX(AV_SYNC_THRESHOLD_MIN, FFMIN(AV_SYNC_THRESHOLD_MAX, delay));
+        /* -- by bbcallen: replace is->max_frame_duration with AV_NOSYNC_THRESHOLD */
+        if (!isnan(diff) && fabs(diff) < AV_NOSYNC_THRESHOLD) {
+            if (diff <= -sync_threshold)
+                delay = FFMAX(0, delay + diff);
+            else if (diff >= sync_threshold && delay > AV_SYNC_FRAMEDUP_THRESHOLD)
+                delay = delay + diff;
+            else if (diff >= sync_threshold)
+                delay = 2 * delay;
+        }
+    }
+
+    if (ffp) {
+        ffp->stat.avdelay = delay;
+        ffp->stat.avdiff  = diff;
+    }
+#ifdef FFP_SHOW_AUDIO_DELAY
+    av_log(NULL, AV_LOG_TRACE, "video: delay=%0.3f A-V=%f\n",
+            delay, -diff);
+#endif
+
+    return delay;
+}
+```
+
+- 跟增同步类型看到在初始化的时候. 默认设置了同步到音频. 
+- `ijkmedia/ijkplayer/ff_ffplay_def.h#733#ffp_reset_internal`
+
+```c
+inline static void ffp_reset_internal(FFPlayer *ffp)
+{
+    /* ffp->is closed in stream_close() */
+    av_opt_free(ffp);
+
+    /* format/codec options */
+    av_dict_free(&ffp->format_opts);
+    av_dict_free(&ffp->codec_opts);
+    av_dict_free(&ffp->sws_dict);
+    av_dict_free(&ffp->player_opts);
+    av_dict_free(&ffp->swr_opts);
+    av_dict_free(&ffp->swr_preset_opts);
+
+    /* ffplay options specified by the user */
+    av_freep(&ffp->input_filename);
+    ffp->audio_disable          = 0;
+    ffp->video_disable          = 0;
+    memset(ffp->wanted_stream_spec, 0, sizeof(ffp->wanted_stream_spec));
+    ffp->seek_by_bytes          = -1;
+    ffp->display_disable        = 0;
+    ffp->show_status            = 0;
+	//初始化音视频同步方案.默认同步到音频. 
+    ffp->av_sync_type           = AV_SYNC_AUDIO_MASTER;
+    ...
+}
+```
+
+- 修改jni方法中的同步类型`IjkMediaPlayer_setZeroDelay`
+
+```c
++ #include "../ff_ffplay_def.h"
+
+/**
+* 0延时开关. 
+*@delayOpen  0:关闭 1：开启 默认关闭. 
+*/
+static void
+IjkMediaPlayer_setZeroDelay(JNIEnv *env, jobject thiz, jint delayOpen)
+{
+    MPTRACE("%s\n", __func__);
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    //给mediaplayer赋值. 
+    mp->ffplayer->delay_forbidden = delayOpen;
++    //如果打开0延迟则设置视频为主同步
++    if(delayOpen){
++      mp->ffplayer->av_sync_type  = AV_SYNC_VIDEO_MASTER; 
++    } else {
++      mp->ffplayer->av_sync_type	= AV_SYNC_AUDIO_MASTER; 
++    }
+	
+    ijkmp_dec_ref_p(&mp);
+}
+
+```
+- 重新编译ijkplayer(这里只有ijk的代码修改了，不需要重新编译ffmpeg和openssl)
+
+```shell
+~/develop/caixingming/ijkplayer-android/android$ ./compile-ijk.sh all
+
+```
+
+
+- 修改`IjkMediaPlayer.java`
+
+```java
+     /**
+      * 设置是否开启延时开关，ptz需要0延迟
+      * 0： 关闭 default
+      * 1:  开启0延迟video，音频会延迟2s,待解决.
+      * @param delayOpen
+      */
+      private native void _setZeroDelay(int delayOpen);
+    
+     /**
+     * 是否开启视频0延迟开关.
+     * @param isOpen  true：开启0延迟 ptz控制会达到0延迟 默认关闭：false.
+     */
+    public void setVideoZeroDelay(boolean isOpen){
+        _setZeroDelay(isOpen?1:0);
+    }   
+```
+
+
+- 修改`IjkVideoView.java`
+
+```java
+
+  private boolean isVideoZeroDelay = false;
+  
+    /**
+     * @param isOpen true:打开0延迟  false :关闭.
+     */
+    public void openZeroVideoDelay(boolean isOpen){
+        Log.e(TAG, "openZeroVideoDelay  ~"+isOpen);
+        isVideoZeroDelay = isOpen;
+        if(mMediaPlayer != null){
+            if(mMediaPlayer instanceof IjkMediaPlayer){
+                Log.e(TAG, "openZeroVideoDelay#setVideoZeroDelay \n");
+                ((IjkMediaPlayer)mMediaPlayer).setVideoZeroDelay(isVideoZeroDelay);
+            }
+        }else{
+            Log.e(TAG, "openZeroVideoDelay  ~mMediaPlayer "+mMediaPlayer);
+        }
+    }
+    
+    public IMediaPlayer createPlayer(int playerType ,int url_type) {
+        Log.e(TAG,"createPlayer~url_type"+url_type+" playerType"+playerType);
+        IMediaPlayer mediaPlayer = null;
+
+        switch (playerType) {
+        ...
+        default: {
+                IjkMediaPlayer ijkMediaPlayer = null;
+                if (mUri != null) {
+                    ijkMediaPlayer = new IjkMediaPlayer();
+                    ijkMediaPlayer.native_setLogLevel(mLogLevel);
+                    Log.e(TAG,"create mediaplayer#setVideoZeroDelay!~"+isVideoZeroDelay);
+                    ijkMediaPlayer.setVideoZeroDelay(isVideoZeroDelay);
+                    //ijk不支持rtmp设置超时，原因是ffmpeg的问题 .
+                }
+        }
+    }
+```
+
+
+- 使用
+
+```java
+//打开视频0延迟.
+        mVideoView.openZeroVideoDelay(true);
+        // prefer mVideoPath
+        if (mVideoPath != null)
+            mVideoView.setVideoPath(mVideoPath, IjkVideoView.IJK_TYPE_LIVING_WATCH);
+```
+
+- 具体代码可以看项目[ijkrtspdemo](https://github.com/jdpxiaoming/ijkrtspdemo)
+
+- 友联 & 相关开源项目源码出处. 
+
+- [GitHub - jdpxiaoming/PPlayer: ffmpeg 4.0.2静态库从0开始一个播放器的搭建，支持rtmp、rtsp、hls、本地MP4文件播放，音视频同步，直播推流](https://github.com/jdpxiaoming/PPlayer)
+
+- [GitHub - jdpxiaoming/ijkrtspdemo: ijkplayer open the rtsp & h265 surpport android demo .](https://github.com/jdpxiaoming/ijkrtspdemo)
+
+- [GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.](https://github.com/jdpxiaoming/FFmpegTools/)
+

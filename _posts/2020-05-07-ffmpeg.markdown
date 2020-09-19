@@ -165,6 +165,14 @@ ffprobe -show_format -show_streams filename
 ```
 
 
+- 转换视频颜色格式为yuv420p（默认yuvj422p)
+
+```shell
+ffmpeg -rtsp_transport tcp -i rtsp://47.108.81.159:5555/rtsp/1bac7b77-8a39-425b-9e2f-c2d66d441aef -pix_fmt yuv420p t.mp4
+
+```
+
+
 - 友联 & 相关开源项目源码出处. 
 
 - [GitHub - jdpxiaoming/PPlayer: ffmpeg 4.0.2静态库从0开始一个播放器的搭建，支持rtmp、rtsp、hls、本地MP4文件播放，音视频同步，直播推流](https://github.com/jdpxiaoming/PPlayer)
