@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>(转)IikPlayer frame queue分析 | poe Blog</title>
+<meta name="generator" content="Jekyll v3.8.7" />
+<meta property="og:title" content="(转)IikPlayer frame queue分析" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="ffplay frame queue分析" />
+<meta property="og:description" content="ffplay frame queue分析" />
+<link rel="canonical" href="http://localhost:4000/jekyll/update/2020/09/19/ijkplayer05.html" />
+<meta property="og:url" content="http://localhost:4000/jekyll/update/2020/09/19/ijkplayer05.html" />
+<meta property="og:site_name" content="poe Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-09-19T12:27:01+08:00" />
+<script type="application/ld+json">
+{"@type":"BlogPosting","headline":"(转)IikPlayer frame queue分析","dateModified":"2020-09-19T12:27:01+08:00","datePublished":"2020-09-19T12:27:01+08:00","url":"http://localhost:4000/jekyll/update/2020/09/19/ijkplayer05.html","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/jekyll/update/2020/09/19/ijkplayer05.html"},"description":"ffplay frame queue分析","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="poe Blog" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">poe Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">(转)IikPlayer frame queue分析</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2020-09-19T12:27:01+08:00" itemprop="datePublished">Sep 19, 2020
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h1 id="ffplay-frame-queue分析">ffplay frame queue分析</h1>
+
+<p>出处：<a href="https://zhuanlan.zhihu.com/p/43564980">ffplay frame queue分析 - 知乎</a></p>
+
+<p>ffplay用frame queue保存解码后的数据。</p>
+
+<p>首先定义了一个结构体Frame用于保存一帧视频画面、音频或者字幕：</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="k">struct</span> <span class="n">Frame</span> <span class="p">{</span>
+    <span class="n">AVFrame</span> <span class="o">*</span><span class="n">frame</span><span class="p">;</span> <span class="c1">//视频或音频的解码数据</span>
+    <span class="n">AVSubtitle</span> <span class="n">sub</span><span class="p">;</span> <span class="c1">//解码的字幕数据</span>
+    <span class="kt">int</span> <span class="n">serial</span><span class="p">;</span>
+    <span class="kt">double</span> <span class="n">pts</span><span class="p">;</span>           <span class="cm">/* presentation timestamp for the frame */</span>
+    <span class="kt">double</span> <span class="n">duration</span><span class="p">;</span>      <span class="cm">/* estimated duration of the frame */</span>
+    <span class="kt">int64_t</span> <span class="n">pos</span><span class="p">;</span>          <span class="cm">/* byte position of the frame in the input file */</span>
+    <span class="kt">int</span> <span class="n">width</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">height</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">format</span><span class="p">;</span>
+    <span class="n">AVRational</span> <span class="n">sar</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">uploaded</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">flip_v</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">Frame</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>Frame的设计试图用一个结构体“融合”3种数据：视频、音频、字幕，虽然AVFrame既可以表示视频又可以表示音频，但在融合字幕时又需要引入AVSubtitle，以及一些其他字段，如width/height等来补充AVSubtitle，所以整个结构体看起来很“拼凑”（甚至还有视频专用的flip_v字段）。这里先关注frame和sub字段即可。</p>
+
+<p>接着设计了一个FrameQueue用于表示整个帧队列：</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="k">struct</span> <span class="n">FrameQueue</span> <span class="p">{</span>
+    <span class="n">Frame</span> <span class="n">queue</span><span class="p">[</span><span class="n">FRAME_QUEUE_SIZE</span><span class="p">];</span><span class="c1">//队列元素，用数组模拟队列</span>
+    <span class="kt">int</span> <span class="n">rindex</span><span class="p">;</span><span class="c1">//读指针</span>
+    <span class="kt">int</span> <span class="n">windex</span><span class="p">;</span><span class="c1">//写指针</span>
+    <span class="kt">int</span> <span class="n">size</span><span class="p">;</span><span class="c1">//当前存储的节点个数(或者说，当前已写入的节点个数)</span>
+    <span class="kt">int</span> <span class="n">max_size</span><span class="p">;</span><span class="c1">//最大允许存储的节点个数</span>
+    <span class="kt">int</span> <span class="n">keep_last</span><span class="p">;</span><span class="c1">//是否要保留最后一个读节点</span>
+    <span class="kt">int</span> <span class="n">rindex_shown</span><span class="p">;</span><span class="c1">//当前节点是否已经显示</span>
+    <span class="n">SDL_mutex</span> <span class="o">*</span><span class="n">mutex</span><span class="p">;</span>
+    <span class="n">SDL_cond</span> <span class="o">*</span><span class="n">cond</span><span class="p">;</span>
+    <span class="n">PacketQueue</span> <span class="o">*</span><span class="n">pktq</span><span class="p">;</span><span class="c1">//关联的PacketQueue</span>
+<span class="p">}</span> <span class="n">FrameQueue</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>不同于PacketQueue的设计（参考ffplay packet queue分析），FrameQueue不是用链表实现队列，而是用数组实现队列（环形缓冲区）。</p>
+
+<p>从字段的定义上可以看出，FrameQueue的设计显然比PacketQueue要复杂。在深入代码分析之前，先给出其设计理念：</p>
+
+<p>高效率的读写模型（回顾PacketQueue的设计，每次访问都需要加锁整个队列，锁范围很大）
+高效的内存模型（节点内存以数组形式预分配，无需动态分配）
+环形缓冲区设计，同时可以访问上一读节点
+下面看看FrameQueue提供的函数，从初始化函数开始：</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">int</span> <span class="nf">frame_queue_init</span><span class="p">(</span><span class="n">FrameQueue</span> <span class="o">*</span><span class="n">f</span><span class="p">,</span> <span class="n">PacketQueue</span> <span class="o">*</span><span class="n">pktq</span><span class="p">,</span> <span class="kt">int</span> <span class="n">max_size</span><span class="p">,</span> <span class="kt">int</span> <span class="n">keep_last</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+    <span class="n">memset</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">FrameQueue</span><span class="p">));</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">mutex</span> <span class="o">=</span> <span class="n">SDL_CreateMutex</span><span class="p">()))</span> <span class="p">{</span>
+        <span class="n">av_log</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">AV_LOG_FATAL</span><span class="p">,</span> <span class="s">"SDL_CreateMutex(): %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">SDL_GetError</span><span class="p">());</span>
+        <span class="k">return</span> <span class="n">AVERROR</span><span class="p">(</span><span class="n">ENOMEM</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">cond</span> <span class="o">=</span> <span class="n">SDL_CreateCond</span><span class="p">()))</span> <span class="p">{</span>
+        <span class="n">av_log</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">AV_LOG_FATAL</span><span class="p">,</span> <span class="s">"SDL_CreateCond(): %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">SDL_GetError</span><span class="p">());</span>
+        <span class="k">return</span> <span class="n">AVERROR</span><span class="p">(</span><span class="n">ENOMEM</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">f</span><span class="o">-&gt;</span><span class="n">pktq</span> <span class="o">=</span> <span class="n">pktq</span><span class="p">;</span>
+    <span class="n">f</span><span class="o">-&gt;</span><span class="n">max_size</span> <span class="o">=</span> <span class="n">FFMIN</span><span class="p">(</span><span class="n">max_size</span><span class="p">,</span> <span class="n">FRAME_QUEUE_SIZE</span><span class="p">);</span>
+    <span class="n">f</span><span class="o">-&gt;</span><span class="n">keep_last</span> <span class="o">=</span> <span class="o">!!</span><span class="n">keep_last</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">max_size</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">queue</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">frame</span> <span class="o">=</span> <span class="n">av_frame_alloc</span><span class="p">()))</span>
+            <span class="k">return</span> <span class="n">AVERROR</span><span class="p">(</span><span class="n">ENOMEM</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>初始化函数主要是内存初始化、锁初始化。调用参数中两个比较重要的是max_size和keep_last。其中max_size是最大允许存储的节点个数，但最大不超过FRAME_QUEUE_SIZE，FRAME_QUEUE_SIZE的定义是：</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#define VIDEO_PICTURE_QUEUE_SIZE 3
+#define SUBPICTURE_QUEUE_SIZE 16
+#define SAMPLE_QUEUE_SIZE 9
+#define FRAME_QUEUE_SIZE FFMAX(SAMPLE_QUEUE_SIZE, FFMAX(VIDEO_PICTURE_QUEUE_SIZE, SUBPICTURE_QUEUE_SIZE))
+</span></code></pre></div></div>
+
+<p>也就是最大不超过16.</p>
+
+<p>keep_last是一个bool值，表示是否在环形缓冲区的读写过程中保留最后一个读节点不被覆写。f-&gt;keep_last = !!keep_last;里的双感叹号是C中的一种技巧，旨在让int参数规整为0/1的“bool值”。</p>
+
+<p>最后为数组queue中的每个元素的frame(AVFrame*)的字段调用av_frame_alloc分配内存。</p>
+
+<p>看看对应的反初始化函数：</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">void</span> <span class="nf">frame_queue_destory</span><span class="p">(</span><span class="n">FrameQueue</span> <span class="o">*</span><span class="n">f</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">max_size</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Frame</span> <span class="o">*</span><span class="n">vp</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">queue</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+        <span class="n">frame_queue_unref_item</span><span class="p">(</span><span class="n">vp</span><span class="p">);</span>
+        <span class="n">av_frame_free</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vp</span><span class="o">-&gt;</span><span class="n">frame</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">SDL_DestroyMutex</span><span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+    <span class="n">SDL_DestroyCond</span><span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">cond</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>较为重要的是queue元素的释放。分两步，分别是frame_queue_unref_item和av_frame_free。其中av_frame_free与初始化中的av_frame_alloc对应，用于释放AVFrame.</p>
+
+<p>frame_queue_unref_item的定义如下：</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">void</span> <span class="nf">frame_queue_unref_item</span><span class="p">(</span><span class="n">Frame</span> <span class="o">*</span><span class="n">vp</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">av_frame_unref</span><span class="p">(</span><span class="n">vp</span><span class="o">-&gt;</span><span class="n">frame</span><span class="p">);</span><span class="c1">//frame计数减1</span>
+    <span class="n">avsubtitle_free</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vp</span><span class="o">-&gt;</span><span class="n">sub</span><span class="p">);</span><span class="c1">//sub关联的内存释放</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>frame_queue_unref_item释放的内存都是关联的内存，而非结构体自身内存。</p>
+
+<p>AVFrame内部有许多的AVBufferRef类型字段，而AVBufferRef只是AVBuffer的引用，AVBuffer通过引用计数自动管理内存（简易垃圾回收机制）。因此AVFrame在不需要的时候，需要通过av_frame_unref减少引用计数。</p>
+
+<p>关于AVBufferRef的内存管理机制，可以参考这篇文章：https://blog.csdn.net/muyuyuzhong/article/details/79381152
+FrameQueue的“写”分两步，先调用frame_queue_peek_writable获取一个可写节点，在对节点操作结束后，调用frame_queue_push告知FrameQueue“存入”该节点。</p>
+
+<blockquote>
+  <p>阅读提示：
+在ffplay中，FrameQueue始终是一个线程写，另一个线程读。也就是只有一个读线程，不会有其他读线程竞争读；只有一个写线程，不会有其他线程竞争写；唯一需要的是读与写线程间的同步。FrameQueue的整个优化和设计思路正是基于这一点的。
+先看frame_queue_peek_writable：
+```c
+static Frame <em>frame_queue_peek_writable(FrameQueue *f)
+{
+    /</em> wait until we have space to put a new frame */
+    SDL_LockMutex(f-&gt;mutex);
+    while (f-&gt;size &gt;= f-&gt;max_size &amp;&amp;
+           !f-&gt;pktq-&gt;abort_request) {
+        SDL_CondWait(f-&gt;cond, f-&gt;mutex);
+    }
+    SDL_UnlockMutex(f-&gt;mutex);</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>if (f-&gt;pktq-&gt;abort_request)
+    return NULL;
+
+return &amp;f-&gt;queue[f-&gt;windex]; } ```
+</code></pre></div></div>
+
+<p>整个函数分3步：</p>
+
+<ul>
+  <li>加锁情况下，等待直到队列有空余空间可写（f-&gt;size &lt; f-&gt;max_size）</li>
+  <li>如果有退出请求（f-&gt;pktq-&gt;abort_request），则返回NULL</li>
+  <li>返回windex位置的元素（windex指向当前应写位置）</li>
+</ul>
+
+<p>为什么这里锁的范围不是整个函数呢？这是为了减小锁的范围，以提高效率。而之所以可以在无锁的情况下安全访问queue 字段，是因为上文中提到的单读单写的特殊场景。首先，queue是一个预先分配好的数组，因此queue本身不发生变化，可以安全访问；接着queue内的元素，读和写不存在重叠，即windex和rindex不会重叠。</p>
+
+<p>关于“读和写不存在重叠”，仔细看看。因为queue数组被当做一个环形缓冲区使用，那么的确存在underrun和overrun的情况，即读过快，或写过快的情况，这时如果不加控制，就会呈现缓冲区覆盖。</p>
+
+<p>FrameQueue的精明之处在于，先通过size判断当前缓冲区内空间是否够写，或者够读，比如这里先通过一个循环的条件等待，判断f-&gt;size &gt;= f-&gt;max_size，如果f-&gt;size &gt;= f-&gt;max_size，那么说明队列中的节点已经写满，也就是已经overrun了，此时如果再写，肯定会覆写未读数据，那么就需要继续等待。当无需等待时，windex指向的内存一定是已经读过的（除非代码异常了）。</p>
+
+<p>调用frame_queue_peek_writable取到Frame指针后，就可以对Frame内的字段自由改写，因为只有一个写进程，且无需担心读进程覆写（如上分析，读进程要读一个节点时，也会先判断underrun的情况）。</p>
+
+<p>一般步骤是：</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Frame</span><span class="o">*</span> <span class="n">vp</span> <span class="o">=</span> <span class="n">frame_queue_peek_writable</span><span class="p">(</span><span class="n">q</span><span class="p">);</span>
+<span class="c1">//将要存储的数据写入frame字段，比如：</span>
+<span class="n">av_frame_move_ref</span><span class="p">(</span><span class="n">vp</span><span class="o">-&gt;</span><span class="n">frame</span><span class="p">,</span> <span class="n">src_frame</span><span class="p">);</span>
+<span class="c1">//存入队列</span>
+<span class="n">frame_queue_push</span><span class="p">(</span><span class="n">q</span><span class="p">);</span>
+<span class="n">frame_queue_push</span><span class="err">怎么知道要</span><span class="n">push</span><span class="err">的是这里的</span><span class="n">vp</span><span class="err">呢？</span>
+
+<span class="k">static</span> <span class="kt">void</span> <span class="nf">frame_queue_push</span><span class="p">(</span><span class="n">FrameQueue</span> <span class="o">*</span><span class="n">f</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">++</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">windex</span> <span class="o">==</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">max_size</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">-&gt;</span><span class="n">windex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">SDL_LockMutex</span><span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+    <span class="n">f</span><span class="o">-&gt;</span><span class="n">size</span><span class="o">++</span><span class="p">;</span>
+    <span class="n">SDL_CondSignal</span><span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">cond</span><span class="p">);</span>
+    <span class="n">SDL_UnlockMutex</span><span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>答案是push当前windex节点。看frame_queue_push函数，执行两个步骤：</p>
+
+<p>windex加1，如果超过max_size，则回环为0
+加锁情况下大小加1.
+因为FrameQueue是基于固定长度的数组实现的队列，与链表队列不同，其节点在初始化的时候已经在队列中了，push所要做的只是通过某种标志记录该节点是否是写入未读的。ffplay的做法是对windex加1，将写指针移动到下一个元素，凡是windex“之前”的节点，都是写过的。（至于是否可读，rindex知道；至于后续有多少空间可写，size知道）</p>
+
+<p>frame_queue的写过程总结示意图如下：
+<img src="/assets/blog_res/b2ffb2cd.png" alt="b2ffb2cd.png" />
+和写一样，FrameQueue的读也分两步。frame_queue_peek_readable和frame_queue_next。相比写要复杂一点的是 ，读的代码多考虑另一个特性，即允许保留上一读节点。</p>
+
+<p>frame_queue_peek_readable代码如下：</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="n">Frame</span> <span class="o">*</span><span class="nf">frame_queue_peek_readable</span><span class="p">(</span><span class="n">FrameQueue</span> <span class="o">*</span><span class="n">f</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="cm">/* wait until we have a readable a new frame */</span>
+    <span class="n">SDL_LockMutex</span><span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">-</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">rindex_shown</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span>
+           <span class="o">!</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">pktq</span><span class="o">-&gt;</span><span class="n">abort_request</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">SDL_CondWait</span><span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">cond</span><span class="p">,</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">SDL_UnlockMutex</span><span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">pktq</span><span class="o">-&gt;</span><span class="n">abort_request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="o">&amp;</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">queue</span><span class="p">[(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">rindex</span> <span class="o">+</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">rindex_shown</span><span class="p">)</span> <span class="o">%</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">max_size</span><span class="p">];</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>和frame_queue_peek_writable类似，分三步:</p>
+
+<ul>
+  <li>加锁情况下，判断是否有可读节点（f-&gt;size - f-&gt;rindex_shown &gt; 0)</li>
+  <li>如果有退出请求，则返回NULL</li>
+  <li>读取当前可读节点(f-&gt;rindex + f-&gt;rindex_shown) % f-&gt;max_size</li>
+</ul>
+
+<p>rindex_shown有些干扰代码分析，我们先看不支持keep_last的情况（只需要在初始化的时候传入keep_last = 0），此时rindex_shown始终为0，所以，frame_queue_peek_readable简化如下：</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="n">Frame</span> <span class="o">*</span><span class="nf">frame_queue_peek_readable</span><span class="p">(</span><span class="n">FrameQueue</span> <span class="o">*</span><span class="n">f</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="cm">/* wait until we have a readable a new frame */</span>
+    <span class="n">SDL_LockMutex</span><span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span>
+           <span class="o">!</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">pktq</span><span class="o">-&gt;</span><span class="n">abort_request</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">SDL_CondWait</span><span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">cond</span><span class="p">,</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">SDL_UnlockMutex</span><span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">pktq</span><span class="o">-&gt;</span><span class="n">abort_request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="o">&amp;</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">queue</span><span class="p">[</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">rindex</span><span class="p">];</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>和peek_writable几乎是一一对应的。就不分析了。</p>
+
+<p>在简化版本上理解引入rindex_shown的代码，我们需要先理解rindex_shown。rindex_shown的意思是rindex指向的节点是否被读过，如果被读过， 为1，反之，为0。这一行为，体现在frame_queue_next：</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">void</span> <span class="nf">frame_queue_next</span><span class="p">(</span><span class="n">FrameQueue</span> <span class="o">*</span><span class="n">f</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">//如果支持keep_last，且rindex_shown为0，则rindex_shown赋1，返回</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">keep_last</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">rindex_shown</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">f</span><span class="o">-&gt;</span><span class="n">rindex_shown</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">//否则，移动rindex指针，并减小size</span>
+    <span class="n">frame_queue_unref_item</span><span class="p">(</span><span class="o">&amp;</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">queue</span><span class="p">[</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">rindex</span><span class="p">]);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">++</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">rindex</span> <span class="o">==</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">max_size</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">-&gt;</span><span class="n">rindex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">SDL_LockMutex</span><span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+    <span class="n">f</span><span class="o">-&gt;</span><span class="n">size</span><span class="o">--</span><span class="p">;</span>
+    <span class="n">SDL_CondSignal</span><span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">cond</span><span class="p">);</span>
+    <span class="n">SDL_UnlockMutex</span><span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>frame_queue_next用于在读完一个节点后调用，用于标记一个节点已经被读过。</p>
+
+<p>与写过程类似，读过程可以描述为：</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Frame</span><span class="o">*</span> <span class="n">vp</span> <span class="o">=</span> <span class="n">frame_queue_peek_readable</span><span class="p">(</span><span class="n">f</span><span class="p">);</span>
+<span class="c1">//读取vp的数据，比如</span>
+<span class="n">printf</span><span class="p">(</span><span class="s">"pict_type=%d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">vp</span><span class="o">-&gt;</span><span class="n">frame</span><span class="o">-&gt;</span><span class="n">pict_type</span><span class="p">);</span>
+<span class="n">frame_queue_next</span><span class="p">(</span><span class="n">f</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>frame_queue_next比frame_queue_push略复杂，我们要分析两个行为：标记一个节点为已读，以及rindex_shown的赋值。</p>
+
+<p>标记一个节点为已读于标记一个节点为已写是类似的，执行两个步骤：</p>
+
+<ul>
+  <li>rindex加1，如果超过max_size，则回环为0</li>
+  <li>加锁情况下大小减1.</li>
+</ul>
+
+<p>特别的是，对于以及读过的节点，需要调用frame_queue_unref_item释放关联内存。</p>
+
+<p>执行rindex操作前，需要先判断rindex_shown的值，如果为0，则赋1。这么做的意图不妨画图分析：
+<img src="/assets/blog_res/9fc0c353.png" alt="9fc0c353.png" /></p>
+
+<p>这里模拟了从初始化开始的2次“读”。</p>
+
+<p>还没开始读，rindex和rindex_shown均为0。这时要peek的读节点是节点0(图中黑色块）。</p>
+
+<p>第一次读，调用next，满足条件f-&gt;keep_last &amp;&amp; !f-&gt;rindex_shown，所以rindex仍然是0，而rindex_shown为1.此时节点0（灰色块）是已读节点，也是要keep的last节点，将要读的节点是节点1（黑色块）。（恰好是rindex+rindex_shown）</p>
+
+<p>第二次读，peek了黑色块后，调用next，不满足条件f-&gt;keep_last &amp;&amp; !f-&gt;rindex_shown，所以rindex为1，而rindex_shown为1.此时节点1（灰色块）是last节点，节点2（黑色块）是将要读的节点。（也恰好是rindex+rindex_shown）</p>
+
+<p>继续往后分析，会一直重复第二次读的情况，始终是rindex指向了last，而rindex_shown一直为1，rindex+rindex_shown刚好是将要读的节点。</p>
+
+<p>至此，frame_queue_next的行为算是明确了。回头看看frame_queue_peek_readable。</p>
+
+<p>步骤1中，判断无可读节点，用的是f-&gt;size - f-&gt;rindex_shown &lt;= 0，其实是以下代码的简化：</p>
+
+<p>if (f-&gt;rindex_shown)
+    return f-&gt;size - 1;
+else
+    return f-&gt;size;
+只是C中用int模拟bool，刚好rindex_shown为true是1，所以可以简化为`f-&gt;size - f-&gt;rindex_shown.</p>
+
+<p>步骤3中，取将要读的节点用的是(f-&gt;rindex + f-&gt;rindex_shown) % f-&gt;max_size，同样也是一个简化：</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//这段代码根据上图很容易推导</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">rindex_shown</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">rindex</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">max_size</span><span class="p">;</span> <span class="c1">//因为rindex加1后可能超过max_size，所以这里取余</span>
+<span class="k">else</span>
+    <span class="k">return</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">rindex</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>以上，FrameQueue的读过程也分析完了。</p>
+
+<p>为了支持灵活地读，还有一些辅助函数：</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//读当前节点（上文中的用词是“将要读的节点”，也就是黑色块），与frame_queue_peek_readable等效，但没有检查是否有可读节点</span>
+<span class="k">static</span> <span class="n">Frame</span> <span class="o">*</span><span class="nf">frame_queue_peek</span><span class="p">(</span><span class="n">FrameQueue</span> <span class="o">*</span><span class="n">f</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="o">&amp;</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">queue</span><span class="p">[(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">rindex</span> <span class="o">+</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">rindex_shown</span><span class="p">)</span> <span class="o">%</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">max_size</span><span class="p">];</span>
+<span class="p">}</span>
+
+<span class="c1">//读下一个节点</span>
+<span class="k">static</span> <span class="n">Frame</span> <span class="o">*</span><span class="nf">frame_queue_peek_next</span><span class="p">(</span><span class="n">FrameQueue</span> <span class="o">*</span><span class="n">f</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="o">&amp;</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">queue</span><span class="p">[(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">rindex</span> <span class="o">+</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">rindex_shown</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">max_size</span><span class="p">];</span>
+<span class="p">}</span>
+
+<span class="c1">//读上一个节点</span>
+<span class="k">static</span> <span class="n">Frame</span> <span class="o">*</span><span class="nf">frame_queue_peek_last</span><span class="p">(</span><span class="n">FrameQueue</span> <span class="o">*</span><span class="n">f</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="o">&amp;</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">queue</span><span class="p">[</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">rindex</span><span class="p">];</span>
+<span class="p">}</span>
+
+<span class="cm">/* return the number of undisplayed frames in the queue */</span>
+<span class="k">static</span> <span class="kt">int</span> <span class="nf">frame_queue_nb_remaining</span><span class="p">(</span><span class="n">FrameQueue</span> <span class="o">*</span><span class="n">f</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">-</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">rindex_shown</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>实现都比较简单，借助上图看下节点位置：</p>
+
+<p><img src="/assets/blog_res/36c40b80.png" alt="36c40b80.png" /></p>
+
+<p>至此，FrameQueue的主体功能分析完了。从源码中可以看到FrameQueue是针对单读单写优化的高效的多线程模型，其设计思路不失为在C语言实践中可借鉴的一个好例子。</p>
+
+<ul>
+  <li>
+    <p>友联 &amp; 相关开源项目源码出处.</p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/PPlayer">GitHub - jdpxiaoming/PPlayer: ffmpeg 4.0.2静态库从0开始一个播放器的搭建，支持rtmp、rtsp、hls、本地MP4文件播放，音视频同步，直播推流</a></p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/ijkrtspdemo">GitHub - jdpxiaoming/ijkrtspdemo: ijkplayer open the rtsp &amp; h265 surpport android demo .</a></p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/FFmpegTools/">GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.</a></p>
+  </li>
+</ul>
+
+
+  </div><a class="u-url" href="/jekyll/update/2020/09/19/ijkplayer05.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">poe Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">poe Blog</li><li><a class="u-email" href="mailto:302940116@qq.com">302940116@qq.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">jdpxiaoming</span></a></li><li><a href="https://www.twitter.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">jdpxiaoming</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>不积跬步无以至千里，先从一篇blog出发， 归纳总结出一个多媒体安卓工程师的技术轨迹。</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

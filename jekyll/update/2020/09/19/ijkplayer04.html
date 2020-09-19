@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>(转)IikPlayer packet queue分析 | poe Blog</title>
+<meta name="generator" content="Jekyll v3.8.7" />
+<meta property="og:title" content="(转)IikPlayer packet queue分析" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="ffplay packet queue分析" />
+<meta property="og:description" content="ffplay packet queue分析" />
+<link rel="canonical" href="http://localhost:4000/jekyll/update/2020/09/19/ijkplayer04.html" />
+<meta property="og:url" content="http://localhost:4000/jekyll/update/2020/09/19/ijkplayer04.html" />
+<meta property="og:site_name" content="poe Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-09-19T10:27:01+08:00" />
+<script type="application/ld+json">
+{"@type":"BlogPosting","headline":"(转)IikPlayer packet queue分析","dateModified":"2020-09-19T10:27:01+08:00","datePublished":"2020-09-19T10:27:01+08:00","url":"http://localhost:4000/jekyll/update/2020/09/19/ijkplayer04.html","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/jekyll/update/2020/09/19/ijkplayer04.html"},"description":"ffplay packet queue分析","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="poe Blog" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">poe Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">(转)IikPlayer packet queue分析</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2020-09-19T10:27:01+08:00" itemprop="datePublished">Sep 19, 2020
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h1 id="ffplay-packet-queue分析">ffplay packet queue分析</h1>
+
+<ul>
+  <li>转载自:<a href="https://zhuanlan.zhihu.com/p/43295650">ffplay packet queue分析 - 知乎</a></li>
+</ul>
+
+<p>ffplay用PacketQueue保存解封装后的数据，即保存AVPacket。</p>
+
+<p>ffplay首先定义了一个结构体MyAVPacketList：</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="k">struct</span> <span class="n">MyAVPacketList</span> <span class="p">{</span>
+    <span class="n">AVPacket</span> <span class="n">pkt</span><span class="p">;</span><span class="c1">//解封装后的数据</span>
+    <span class="k">struct</span> <span class="n">MyAVPacketList</span> <span class="o">*</span><span class="n">next</span><span class="p">;</span><span class="c1">//下一个节点</span>
+    <span class="kt">int</span> <span class="n">serial</span><span class="p">;</span><span class="c1">//序列号</span>
+<span class="p">}</span> <span class="n">MyAVPacketList</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>可以理解为是队列的一个节点。可以通过其next字段访问下一个节点。</p>
+
+<p>所以这里我认为命名为MyAVPacketNode更为合理
+serial字段主要用于标记当前节点的序列号，ffplay中多处用到serial的概念，一般用于区分是否连续数据。在后面的代码分析中我们还会看到它的作用。</p>
+
+<p>接着定义另一个结构体PacketQueue：</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="k">struct</span> <span class="n">PacketQueue</span> <span class="p">{</span>
+    <span class="n">MyAVPacketList</span> <span class="o">*</span><span class="n">first_pkt</span><span class="p">,</span> <span class="o">*</span><span class="n">last_pkt</span><span class="p">;</span><span class="c1">//队首，队尾</span>
+    <span class="kt">int</span> <span class="n">nb_packets</span><span class="p">;</span><span class="c1">//队列中一共有多少个节点</span>
+    <span class="kt">int</span> <span class="n">size</span><span class="p">;</span><span class="c1">//队列所有节点字节总数，用于计算cache大小</span>
+    <span class="kt">int64_t</span> <span class="n">duration</span><span class="p">;</span><span class="c1">//队列所有节点的合计时长</span>
+    <span class="kt">int</span> <span class="n">abort_request</span><span class="p">;</span><span class="c1">//是否要中止队列操作，用于安全快速退出播放</span>
+    <span class="kt">int</span> <span class="n">serial</span><span class="p">;</span><span class="c1">//序列号，和MyAVPacketList的serial作用相同，但改变的时序稍微有点不同</span>
+    <span class="n">SDL_mutex</span> <span class="o">*</span><span class="n">mutex</span><span class="p">;</span><span class="c1">//用于维持PacketQueue的多线程安全(SDL_mutex可以按pthread_mutex_t理解）</span>
+    <span class="n">SDL_cond</span> <span class="o">*</span><span class="n">cond</span><span class="p">;</span><span class="c1">//用于读、写线程相互通知(SDL_cond可以按pthread_cond_t理解)</span>
+<span class="p">}</span> <span class="n">PacketQueue</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>这个结构体内定义了“队列”自身的属性。上面的注释对每个字段作了简单的介绍，接下来我们从队列的操作函数具体分析各个字段的含义。</p>
+
+<p>PacketQueue操作提供以下方法：</p>
+
+<ul>
+  <li>packet_queue_init：初始化</li>
+  <li>packet_queue_destroy：销毁</li>
+  <li>packet_queue_start：启用</li>
+  <li>packet_queue_abort：中止</li>
+  <li>packet_queue_get：获取一个节点</li>
+  <li>packet_queue_put：存入一个节点</li>
+  <li>packet_queue_put_nullpacket：存入一个空节点</li>
+  <li>packet_queue_flush：清除队列内所有的节点
+初始化用于初始各个字段的值，并创建mutex和cond：
+    <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">int</span> <span class="nf">packet_queue_init</span><span class="p">(</span><span class="n">PacketQueue</span> <span class="o">*</span><span class="n">q</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">memset</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">PacketQueue</span><span class="p">));</span>
+  <span class="n">q</span><span class="o">-&gt;</span><span class="n">mutex</span> <span class="o">=</span> <span class="n">SDL_CreateMutex</span><span class="p">();</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">av_log</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">AV_LOG_FATAL</span><span class="p">,</span> <span class="s">"SDL_CreateMutex(): %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">SDL_GetError</span><span class="p">());</span>
+      <span class="k">return</span> <span class="n">AVERROR</span><span class="p">(</span><span class="n">ENOMEM</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="n">q</span><span class="o">-&gt;</span><span class="n">cond</span> <span class="o">=</span> <span class="n">SDL_CreateCond</span><span class="p">();</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">cond</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">av_log</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">AV_LOG_FATAL</span><span class="p">,</span> <span class="s">"SDL_CreateCond(): %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">SDL_GetError</span><span class="p">());</span>
+      <span class="k">return</span> <span class="n">AVERROR</span><span class="p">(</span><span class="n">ENOMEM</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="n">q</span><span class="o">-&gt;</span><span class="n">abort_request</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<p>相应的，销毁过程负责清理mutex和cond:</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">void</span> <span class="nf">packet_queue_destroy</span><span class="p">(</span><span class="n">PacketQueue</span> <span class="o">*</span><span class="n">q</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">packet_queue_flush</span><span class="p">(</span><span class="n">q</span><span class="p">);</span><span class="c1">//先清除所有的节点</span>
+    <span class="n">SDL_DestroyMutex</span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+    <span class="n">SDL_DestroyCond</span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">cond</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>启用队列：</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">void</span> <span class="nf">packet_queue_start</span><span class="p">(</span><span class="n">PacketQueue</span> <span class="o">*</span><span class="n">q</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">SDL_LockMutex</span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+    <span class="n">q</span><span class="o">-&gt;</span><span class="n">abort_request</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">packet_queue_put_private</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">flush_pkt</span><span class="p">);</span><span class="c1">//这里放入了一个flush_pkt</span>
+    <span class="n">SDL_UnlockMutex</span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>flush_pkt定义是static AVPacket flush_pkt;，是一个特殊的packet，主要用来作为非连续的两端数据的“分界”标记。</p>
+
+<p>中止队列：</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">void</span> <span class="nf">packet_queue_abort</span><span class="p">(</span><span class="n">PacketQueue</span> <span class="o">*</span><span class="n">q</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">SDL_LockMutex</span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+    <span class="n">q</span><span class="o">-&gt;</span><span class="n">abort_request</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">SDL_CondSignal</span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">cond</span><span class="p">);</span><span class="c1">//释放一个条件信号</span>
+    <span class="n">SDL_UnlockMutex</span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这里SDL_CondSignal的作用在于确保当前等待该条件的线程能被激活并继续执行退出流程。</p>
+
+<p>读、写是PacketQueue的主要方法。</p>
+
+<p>先看写——往队列中放入一个节点：</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">int</span> <span class="nf">packet_queue_put</span><span class="p">(</span><span class="n">PacketQueue</span> <span class="o">*</span><span class="n">q</span><span class="p">,</span> <span class="n">AVPacket</span> <span class="o">*</span><span class="n">pkt</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">ret</span><span class="p">;</span>
+
+    <span class="n">SDL_LockMutex</span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">packet_queue_put_private</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">pkt</span><span class="p">);</span><span class="c1">//主要实现在这里</span>
+    <span class="n">SDL_UnlockMutex</span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">pkt</span> <span class="o">!=</span> <span class="o">&amp;</span><span class="n">flush_pkt</span> <span class="o">&amp;&amp;</span> <span class="n">ret</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">av_packet_unref</span><span class="p">(</span><span class="n">pkt</span><span class="p">);</span><span class="c1">//放入失败，释放AVPacket</span>
+
+    <span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>主要实现在函数packet_queue_put_private，这里需要注意的是如果放入失败，需要释放AVPacket。</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">int</span> <span class="nf">packet_queue_put_private</span><span class="p">(</span><span class="n">PacketQueue</span> <span class="o">*</span><span class="n">q</span><span class="p">,</span> <span class="n">AVPacket</span> <span class="o">*</span><span class="n">pkt</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">MyAVPacketList</span> <span class="o">*</span><span class="n">pkt1</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">abort_request</span><span class="p">)</span><span class="c1">//如果已中止，则放入失败</span>
+       <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+
+    <span class="n">pkt1</span> <span class="o">=</span> <span class="n">av_malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">MyAVPacketList</span><span class="p">));</span><span class="c1">//分配节点内存</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">pkt1</span><span class="p">)</span><span class="c1">//内存不足，则放入失败</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="n">pkt1</span><span class="o">-&gt;</span><span class="n">pkt</span> <span class="o">=</span> <span class="o">*</span><span class="n">pkt</span><span class="p">;</span><span class="c1">//拷贝AVPacket(浅拷贝，AVPacket.data等内存并没有拷贝)</span>
+    <span class="n">pkt1</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">pkt</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">flush_pkt</span><span class="p">)</span><span class="c1">//如果放入的是flush_pkt，需要增加队列的序列号，以区分不连续的两段数据</span>
+        <span class="n">q</span><span class="o">-&gt;</span><span class="n">serial</span><span class="o">++</span><span class="p">;</span>
+    <span class="n">pkt1</span><span class="o">-&gt;</span><span class="n">serial</span> <span class="o">=</span> <span class="n">q</span><span class="o">-&gt;</span><span class="n">serial</span><span class="p">;</span><span class="c1">//用队列序列号标记节点</span>
+
+    <span class="c1">//队列操作：如果last_pkt为空，说明队列是空的，新增节点为队头；否则，队列有数据，则让原队尾的next为新增节点。 最后将队尾指向新增节点</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">last_pkt</span><span class="p">)</span>
+        <span class="n">q</span><span class="o">-&gt;</span><span class="n">first_pkt</span> <span class="o">=</span> <span class="n">pkt1</span><span class="p">;</span>
+    <span class="k">else</span>
+        <span class="n">q</span><span class="o">-&gt;</span><span class="n">last_pkt</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">pkt1</span><span class="p">;</span>
+    <span class="n">q</span><span class="o">-&gt;</span><span class="n">last_pkt</span> <span class="o">=</span> <span class="n">pkt1</span><span class="p">;</span>
+
+    <span class="c1">//队列属性操作：增加节点数、cache大小、cache总时长</span>
+    <span class="n">q</span><span class="o">-&gt;</span><span class="n">nb_packets</span><span class="o">++</span><span class="p">;</span>
+    <span class="n">q</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">+=</span> <span class="n">pkt1</span><span class="o">-&gt;</span><span class="n">pkt</span><span class="p">.</span><span class="n">size</span> <span class="o">+</span> <span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">pkt1</span><span class="p">);</span>
+    <span class="n">q</span><span class="o">-&gt;</span><span class="n">duration</span> <span class="o">+=</span> <span class="n">pkt1</span><span class="o">-&gt;</span><span class="n">pkt</span><span class="p">.</span><span class="n">duration</span><span class="p">;</span>
+
+    <span class="cm">/* XXX: should duplicate packet data in DV case */</span>
+    <span class="c1">//发出信号，表明当前队列中有数据了，通知等待中的读线程可以取数据了</span>
+    <span class="n">SDL_CondSignal</span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">cond</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>对packet_queue_put_private笔者增加了详细注释，应该比较容易理解了。</p>
+
+<p>主要完成3件事：</p>
+
+<p>计算serial。serial标记了这个节点内的数据是何时的。一般情况下新增节点与上一个节点的serial是一样的，但当队列中加入一个flush_pkt后，后续节点的serial会比之前大1.
+队列操作。经典的队列实现方式，不展开了。
+队列属性操作。更新队列中节点的数目、占用字节数（含AVPacket.data的大小）及其时长。
+再来看读——从队列中取一个节点：</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* return &lt; 0 if aborted, 0 if no packet and &gt; 0 if packet.  */</span>
+<span class="c1">//block: 调用者是否需要在没节点可取的情况下阻塞等待</span>
+<span class="c1">//AVPacket: 输出参数，即MyAVPacketList.pkt</span>
+<span class="c1">//serial: 输出参数，即MyAVPacketList.serial</span>
+<span class="k">static</span> <span class="kt">int</span> <span class="nf">packet_queue_get</span><span class="p">(</span><span class="n">PacketQueue</span> <span class="o">*</span><span class="n">q</span><span class="p">,</span> <span class="n">AVPacket</span> <span class="o">*</span><span class="n">pkt</span><span class="p">,</span> <span class="kt">int</span> <span class="n">block</span><span class="p">,</span> <span class="kt">int</span> <span class="o">*</span><span class="n">serial</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">MyAVPacketList</span> <span class="o">*</span><span class="n">pkt1</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">ret</span><span class="p">;</span>
+
+    <span class="n">SDL_LockMutex</span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+
+    <span class="k">for</span> <span class="p">(;;)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">abort_request</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="c1">//......这里是省略的代码，取一个节点，然后break</span>
+    <span class="p">}</span>
+    <span class="n">SDL_UnlockMutex</span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>函数较长，我们先省略for循环的主体部分，简单看下函数整体流程。整体流程比较清晰：加锁，进入循环，如果此时需要退出，则break，返回-1；否则，取一个节点，然后break。</p>
+
+<p>这里for循环主要充当一个“壳”，以方便在一块多分支代码中可以通过break调到统一的出口。
+对于加锁情况下的多分支return，这是一个不错的写法。但要小心这是一把双刃剑，没有仔细处理每个分支，容易陷入死循环。
+然后看for的主体：</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">pkt1</span> <span class="o">=</span> <span class="n">q</span><span class="o">-&gt;</span><span class="n">first_pkt</span><span class="p">;</span><span class="c1">//MyAVPacketList *pkt1; 从队头拿数据</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">pkt1</span><span class="p">)</span> <span class="p">{</span><span class="c1">//队列中有数据</span>
+            <span class="n">q</span><span class="o">-&gt;</span><span class="n">first_pkt</span> <span class="o">=</span> <span class="n">pkt1</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span><span class="c1">//队头移到第二个节点</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">first_pkt</span><span class="p">)</span>
+                <span class="n">q</span><span class="o">-&gt;</span><span class="n">last_pkt</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+            <span class="n">q</span><span class="o">-&gt;</span><span class="n">nb_packets</span><span class="o">--</span><span class="p">;</span><span class="c1">//节点数减1</span>
+            <span class="n">q</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">-=</span> <span class="n">pkt1</span><span class="o">-&gt;</span><span class="n">pkt</span><span class="p">.</span><span class="n">size</span> <span class="o">+</span> <span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">pkt1</span><span class="p">);</span><span class="c1">//cache大小扣除一个节点</span>
+            <span class="n">q</span><span class="o">-&gt;</span><span class="n">duration</span> <span class="o">-=</span> <span class="n">pkt1</span><span class="o">-&gt;</span><span class="n">pkt</span><span class="p">.</span><span class="n">duration</span><span class="p">;</span><span class="c1">//总时长扣除一个节点</span>
+            <span class="o">*</span><span class="n">pkt</span> <span class="o">=</span> <span class="n">pkt1</span><span class="o">-&gt;</span><span class="n">pkt</span><span class="p">;</span><span class="c1">//返回AVPacket，这里发生一次AVPacket结构体拷贝，AVPacket的data只拷贝了指针</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">serial</span><span class="p">)</span><span class="c1">//如果需要输出serial，把serial输出</span>
+                <span class="o">*</span><span class="n">serial</span> <span class="o">=</span> <span class="n">pkt1</span><span class="o">-&gt;</span><span class="n">serial</span><span class="p">;</span>
+            <span class="n">av_free</span><span class="p">(</span><span class="n">pkt1</span><span class="p">);</span><span class="c1">//释放节点内存</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="o">!</span><span class="n">block</span><span class="p">)</span> <span class="p">{</span><span class="c1">//队列中没有数据，且非阻塞调用</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span><span class="c1">//队列中没有数据，且阻塞调用</span>
+            <span class="n">SDL_CondWait</span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">cond</span><span class="p">,</span> <span class="n">q</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span><span class="c1">//这里没有break。for循环的另一个作用是在条件变量满足后重复上述代码取出节点</span>
+        <span class="p">}</span>
+</code></pre></div></div>
+
+<p>我们知道队列是一个先进先出的模型，所以从队头拿数据。对于没有取到数据的情况，根据block参数进行判断是否阻塞，如果阻塞，通过SDL_CondWait等待信号。</p>
+
+<p>如果有取到数据，主要分3个步骤：</p>
+
+<p>队列操作：转移队头、扣除大小。这里nb_packets和duration的运算较明显，size需要注意也要扣除AVPacket的size
+给输出参数赋值：基本就是MyAVPacketList拍平传递给输出参数pkt和serial即可
+释放节点内存：释放放入队列时申请的节点内存
+最后是提供了几个”util”方法：</p>
+
+<p>packet_queue_put_nullpacket放入“空包”。放入空包意味着流的结束，一般在视频读取完成的时候放入空包。该函数的实现很明了，构建一个空包，然后调用packet_queue_put:</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">int</span> <span class="nf">packet_queue_put_nullpacket</span><span class="p">(</span><span class="n">PacketQueue</span> <span class="o">*</span><span class="n">q</span><span class="p">,</span> <span class="kt">int</span> <span class="n">stream_index</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">AVPacket</span> <span class="n">pkt1</span><span class="p">,</span> <span class="o">*</span><span class="n">pkt</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">pkt1</span><span class="p">;</span>
+    <span class="n">av_init_packet</span><span class="p">(</span><span class="n">pkt</span><span class="p">);</span>
+    <span class="n">pkt</span><span class="o">-&gt;</span><span class="n">data</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="n">pkt</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">pkt</span><span class="o">-&gt;</span><span class="n">stream_index</span> <span class="o">=</span> <span class="n">stream_index</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">packet_queue_put</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">pkt</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="n">packet_queue_flush</span><span class="err">用于将队列中的所有节点清除。比如用于销毁队列、</span><span class="n">seek</span><span class="err">操作等。</span>
+
+<span class="k">static</span> <span class="kt">void</span> <span class="nf">packet_queue_flush</span><span class="p">(</span><span class="n">PacketQueue</span> <span class="o">*</span><span class="n">q</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">MyAVPacketList</span> <span class="o">*</span><span class="n">pkt</span><span class="p">,</span> <span class="o">*</span><span class="n">pkt1</span><span class="p">;</span>
+
+    <span class="n">SDL_LockMutex</span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">pkt</span> <span class="o">=</span> <span class="n">q</span><span class="o">-&gt;</span><span class="n">first_pkt</span><span class="p">;</span> <span class="n">pkt</span><span class="p">;</span> <span class="n">pkt</span> <span class="o">=</span> <span class="n">pkt1</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">pkt1</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+        <span class="n">av_packet_unref</span><span class="p">(</span><span class="o">&amp;</span><span class="n">pkt</span><span class="o">-&gt;</span><span class="n">pkt</span><span class="p">);</span>
+        <span class="n">av_freep</span><span class="p">(</span><span class="o">&amp;</span><span class="n">pkt</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">q</span><span class="o">-&gt;</span><span class="n">last_pkt</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="n">q</span><span class="o">-&gt;</span><span class="n">first_pkt</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="n">q</span><span class="o">-&gt;</span><span class="n">nb_packets</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">q</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">q</span><span class="o">-&gt;</span><span class="n">duration</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">SDL_UnlockMutex</span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">mutex</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>函数主体的for循环是队列遍历，遍历过程释放节点和AVPacket。最后将PacketQueue的属性恢复为空队列状态。</p>
+
+<p>至此，我们分析了PacketQueue的实现和主要的操作方法。</p>
+
+<p>现在总结下两个关键的点：</p>
+
+<p>第一，PacketQueue的内存管理：
+<img src="/assets/blog_res/c6b059bc.png" alt="c6b059bc.png" /></p>
+
+<p>MyAVPacketList的内存是完全由PacketQueue维护的，在put的时候malloc，在get的时候free。</p>
+
+<p>AVPacket分两块，一部分是AVPacket结构体的内存，这部分从MyAVPacketList的定义可以看出是和MyAVPacketList共存亡的。另一部分是AVPacket字段指向的内存，这部分一般通过av_packet_unref函数释放。一般情况下，是在get后由调用者负责用av_packet_unref函数释放。特殊的情况是当碰到packet_queue_flush或put失败时，这时需要队列自己处理。</p>
+
+<p>第二，serial的变化过程：
+<img src="/assets/blog_res/44c08383.png" alt="44c08383.png" /></p>
+
+<p>如上图所示，左边是队头，右边是队尾，从左往右标注了5个节点的serial，以及放入对应节点时queue的serial。</p>
+
+<p>可以看到放入flush_pkt的时候后，serial增加了1.</p>
+
+<p>要区分的是上图虽然看起来queue的serial和节点的serial是相等的，但这是放入时相等，在取出时是不等的。假设，现在要从队头取出一个节点，那么取出的节点是serial 1，而PacketQueue自身的queue已经增长到了2.</p>
+
+<p>代码背后的设计思路：</p>
+
+<p>设计一个多线程安全的队列，保存AVPacket，同时统计队列内已缓存的数据大小。（这个统计数据会用来后续设置要缓存的数据量）
+引入serial的概念，区别前后数据包是否连续
+设计了两类特殊的packet——flush_pkt和nullpkt，用于更细致的控制（类似用于多线程编程的事件模型——往队列中放入flush事件、放入null事件）</p>
+
+<ul>
+  <li>
+    <p>友联 &amp; 相关开源项目源码出处.</p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/PPlayer">GitHub - jdpxiaoming/PPlayer: ffmpeg 4.0.2静态库从0开始一个播放器的搭建，支持rtmp、rtsp、hls、本地MP4文件播放，音视频同步，直播推流</a></p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/ijkrtspdemo">GitHub - jdpxiaoming/ijkrtspdemo: ijkplayer open the rtsp &amp; h265 surpport android demo .</a></p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/FFmpegTools/">GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.</a></p>
+  </li>
+</ul>
+
+
+  </div><a class="u-url" href="/jekyll/update/2020/09/19/ijkplayer04.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">poe Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">poe Blog</li><li><a class="u-email" href="mailto:302940116@qq.com">302940116@qq.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">jdpxiaoming</span></a></li><li><a href="https://www.twitter.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">jdpxiaoming</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>不积跬步无以至千里，先从一篇blog出发， 归纳总结出一个多媒体安卓工程师的技术轨迹。</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

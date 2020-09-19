@@ -230,6 +230,14 @@ ffprobe <span class="nt">-show_format</span> <span class="nt">-show_streams</spa
 </code></pre></div></div>
 
 <ul>
+  <li>转换视频颜色格式为yuv420p（默认yuvj422p)</li>
+</ul>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ffmpeg <span class="nt">-rtsp_transport</span> tcp <span class="nt">-i</span> rtsp://47.108.81.159:5555/rtsp/1bac7b77-8a39-425b-9e2f-c2d66d441aef <span class="nt">-pix_fmt</span> yuv420p t.mp4
+
+</code></pre></div></div>
+
+<ul>
   <li>
     <p>友联 &amp; 相关开源项目源码出处.</p>
   </li>

@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>ijkplayer开启视频同步 | poe Blog</title>
+<meta name="generator" content="Jekyll v3.8.7" />
+<meta property="og:title" content="ijkplayer开启视频同步" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="ijkplayer开启视频同步" />
+<meta property="og:description" content="ijkplayer开启视频同步" />
+<link rel="canonical" href="http://localhost:4000/jekyll/update/2020/09/19/ijkplayer07.html" />
+<meta property="og:url" content="http://localhost:4000/jekyll/update/2020/09/19/ijkplayer07.html" />
+<meta property="og:site_name" content="poe Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-09-19T14:27:01+08:00" />
+<script type="application/ld+json">
+{"@type":"BlogPosting","headline":"ijkplayer开启视频同步","dateModified":"2020-09-19T14:27:01+08:00","datePublished":"2020-09-19T14:27:01+08:00","url":"http://localhost:4000/jekyll/update/2020/09/19/ijkplayer07.html","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/jekyll/update/2020/09/19/ijkplayer07.html"},"description":"ijkplayer开启视频同步","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="poe Blog" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">poe Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">ijkplayer开启视频同步</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2020-09-19T14:27:01+08:00" itemprop="datePublished">Sep 19, 2020
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h1 id="ijkplayer开启视频同步">ijkplayer开启视频同步</h1>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">ijkmedia/ijkplayer/ff_ffplay.c#1320</code></li>
+</ul>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* called to display each frame */</span>
+<span class="cm">/**
+* 音视频同步
+* commented by poe.Cai 2020/09/08
+* 
+*/</span>
+<span class="k">static</span> <span class="kt">void</span> <span class="nf">video_refresh</span><span class="p">(</span><span class="n">FFPlayer</span> <span class="o">*</span><span class="n">opaque</span><span class="p">,</span> <span class="kt">double</span> <span class="o">*</span><span class="n">remaining_time</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">FFPlayer</span> <span class="o">*</span><span class="n">ffp</span> <span class="o">=</span> <span class="n">opaque</span><span class="p">;</span>
+    <span class="n">VideoState</span> <span class="o">*</span><span class="n">is</span> <span class="o">=</span> <span class="n">ffp</span><span class="o">-&gt;</span><span class="n">is</span><span class="p">;</span>
+    <span class="kt">double</span> <span class="n">time</span><span class="p">;</span>
+
+    <span class="n">Frame</span> <span class="o">*</span><span class="n">sp</span><span class="p">,</span> <span class="o">*</span><span class="n">sp2</span><span class="p">;</span>
+
+	<span class="c1">//synchronize to an external clock </span>
+	<span class="c1">//与外部时钟同步</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">paused</span> <span class="o">&amp;&amp;</span> <span class="n">get_master_sync_type</span><span class="p">(</span><span class="n">is</span><span class="p">)</span> <span class="o">==</span> <span class="n">AV_SYNC_EXTERNAL_CLOCK</span> <span class="o">&amp;&amp;</span> <span class="n">is</span><span class="o">-&gt;</span><span class="n">realtime</span><span class="p">)</span>
+        <span class="n">check_external_clock_speed</span><span class="p">(</span><span class="n">is</span><span class="p">);</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">ffp</span><span class="o">-&gt;</span><span class="n">display_disable</span> <span class="o">&amp;&amp;</span> <span class="n">is</span><span class="o">-&gt;</span><span class="n">show_mode</span> <span class="o">!=</span> <span class="n">SHOW_MODE_VIDEO</span> <span class="o">&amp;&amp;</span> <span class="n">is</span><span class="o">-&gt;</span><span class="n">audio_st</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">av_gettime_relative</span><span class="p">()</span> <span class="o">/</span> <span class="mi">1000000</span><span class="p">.</span><span class="mi">0</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">force_refresh</span> <span class="o">||</span> <span class="n">is</span><span class="o">-&gt;</span><span class="n">last_vis_time</span> <span class="o">+</span> <span class="n">ffp</span><span class="o">-&gt;</span><span class="n">rdftspeed</span> <span class="o">&lt;</span> <span class="n">time</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">video_display2</span><span class="p">(</span><span class="n">ffp</span><span class="p">);</span>
+            <span class="n">is</span><span class="o">-&gt;</span><span class="n">last_vis_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="o">*</span><span class="n">remaining_time</span> <span class="o">=</span> <span class="n">FFMIN</span><span class="p">(</span><span class="o">*</span><span class="n">remaining_time</span><span class="p">,</span> <span class="n">is</span><span class="o">-&gt;</span><span class="n">last_vis_time</span> <span class="o">+</span> <span class="n">ffp</span><span class="o">-&gt;</span><span class="n">rdftspeed</span> <span class="o">-</span> <span class="n">time</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">video_st</span><span class="p">)</span> <span class="p">{</span>
+<span class="nl">retry:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">frame_queue_nb_remaining</span><span class="p">(</span><span class="o">&amp;</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">pictq</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// nothing to do, no picture to display in the queue</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="kt">double</span> <span class="n">last_duration</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">delay</span><span class="p">;</span>
+            <span class="n">Frame</span> <span class="o">*</span><span class="n">vp</span><span class="p">,</span> <span class="o">*</span><span class="n">lastvp</span><span class="p">;</span>
+
+            <span class="cm">/* dequeue the picture */</span>
+            <span class="n">lastvp</span> <span class="o">=</span> <span class="n">frame_queue_peek_last</span><span class="p">(</span><span class="o">&amp;</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">pictq</span><span class="p">);</span>
+            <span class="n">vp</span> <span class="o">=</span> <span class="n">frame_queue_peek</span><span class="p">(</span><span class="o">&amp;</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">pictq</span><span class="p">);</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">vp</span><span class="o">-&gt;</span><span class="n">serial</span> <span class="o">!=</span> <span class="n">is</span><span class="o">-&gt;</span><span class="n">videoq</span><span class="p">.</span><span class="n">serial</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">frame_queue_next</span><span class="p">(</span><span class="o">&amp;</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">pictq</span><span class="p">);</span>
+                <span class="k">goto</span> <span class="n">retry</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">lastvp</span><span class="o">-&gt;</span><span class="n">serial</span> <span class="o">!=</span> <span class="n">vp</span><span class="o">-&gt;</span><span class="n">serial</span><span class="p">)</span>
+                <span class="n">is</span><span class="o">-&gt;</span><span class="n">frame_timer</span> <span class="o">=</span> <span class="n">av_gettime_relative</span><span class="p">()</span> <span class="o">/</span> <span class="mi">1000000</span><span class="p">.</span><span class="mi">0</span><span class="p">;</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">paused</span><span class="p">)</span>
+                <span class="k">goto</span> <span class="n">display</span><span class="p">;</span>
+
+            <span class="cm">/* compute nominal last_duration */</span>
+            <span class="n">last_duration</span> <span class="o">=</span> <span class="n">vp_duration</span><span class="p">(</span><span class="n">is</span><span class="p">,</span> <span class="n">lastvp</span><span class="p">,</span> <span class="n">vp</span><span class="p">,</span> <span class="n">ffp</span><span class="o">-&gt;</span><span class="n">delay_forbidden</span><span class="p">);</span>
+            <span class="n">delay</span> <span class="o">=</span> <span class="n">compute_target_delay</span><span class="p">(</span><span class="n">ffp</span><span class="p">,</span> <span class="n">last_duration</span><span class="p">,</span> <span class="n">is</span><span class="p">);</span>
+
+            <span class="n">time</span><span class="o">=</span> <span class="n">av_gettime_relative</span><span class="p">()</span><span class="o">/</span><span class="mi">1000000</span><span class="p">.</span><span class="mi">0</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">isnan</span><span class="p">(</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">frame_timer</span><span class="p">)</span> <span class="o">||</span> <span class="n">time</span> <span class="o">&lt;</span> <span class="n">is</span><span class="o">-&gt;</span><span class="n">frame_timer</span><span class="p">)</span>
+                <span class="n">is</span><span class="o">-&gt;</span><span class="n">frame_timer</span> <span class="o">=</span> <span class="n">time</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">time</span> <span class="o">&lt;</span> <span class="n">is</span><span class="o">-&gt;</span><span class="n">frame_timer</span> <span class="o">+</span> <span class="n">delay</span><span class="p">)</span> <span class="p">{</span>
+                <span class="o">*</span><span class="n">remaining_time</span> <span class="o">=</span> <span class="n">FFMIN</span><span class="p">(</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">frame_timer</span> <span class="o">+</span> <span class="n">delay</span> <span class="o">-</span> <span class="n">time</span><span class="p">,</span> <span class="o">*</span><span class="n">remaining_time</span><span class="p">);</span>
+                <span class="k">goto</span> <span class="n">display</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="n">is</span><span class="o">-&gt;</span><span class="n">frame_timer</span> <span class="o">+=</span> <span class="n">delay</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">delay</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">time</span> <span class="o">-</span> <span class="n">is</span><span class="o">-&gt;</span><span class="n">frame_timer</span> <span class="o">&gt;</span> <span class="n">AV_SYNC_THRESHOLD_MAX</span><span class="p">)</span>
+                <span class="n">is</span><span class="o">-&gt;</span><span class="n">frame_timer</span> <span class="o">=</span> <span class="n">time</span><span class="p">;</span>
+
+            <span class="n">SDL_LockMutex</span><span class="p">(</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">pictq</span><span class="p">.</span><span class="n">mutex</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isnan</span><span class="p">(</span><span class="n">vp</span><span class="o">-&gt;</span><span class="n">pts</span><span class="p">))</span>
+                <span class="n">update_video_pts</span><span class="p">(</span><span class="n">is</span><span class="p">,</span> <span class="n">vp</span><span class="o">-&gt;</span><span class="n">pts</span><span class="p">,</span> <span class="n">vp</span><span class="o">-&gt;</span><span class="n">pos</span><span class="p">,</span> <span class="n">vp</span><span class="o">-&gt;</span><span class="n">serial</span><span class="p">);</span>
+            <span class="n">SDL_UnlockMutex</span><span class="p">(</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">pictq</span><span class="p">.</span><span class="n">mutex</span><span class="p">);</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">frame_queue_nb_remaining</span><span class="p">(</span><span class="o">&amp;</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">pictq</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">Frame</span> <span class="o">*</span><span class="n">nextvp</span> <span class="o">=</span> <span class="n">frame_queue_peek_next</span><span class="p">(</span><span class="o">&amp;</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">pictq</span><span class="p">);</span>
+				<span class="c1">//增加参数, ffp-&gt;delay_forbidden</span>
+                <span class="n">duration</span> <span class="o">=</span> <span class="n">vp_duration</span><span class="p">(</span><span class="n">is</span><span class="p">,</span> <span class="n">vp</span><span class="p">,</span> <span class="n">nextvp</span><span class="p">,</span> <span class="n">ffp</span><span class="o">-&gt;</span><span class="n">delay_forbidden</span><span class="p">);</span>
+                <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">step</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">ffp</span><span class="o">-&gt;</span><span class="n">framedrop</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">||</span> <span class="p">(</span><span class="n">ffp</span><span class="o">-&gt;</span><span class="n">framedrop</span> <span class="o">&amp;&amp;</span> <span class="n">get_master_sync_type</span><span class="p">(</span><span class="n">is</span><span class="p">)</span> <span class="o">!=</span> <span class="n">AV_SYNC_VIDEO_MASTER</span><span class="p">))</span> <span class="o">&amp;&amp;</span> <span class="n">time</span> <span class="o">&gt;</span> <span class="n">is</span><span class="o">-&gt;</span><span class="n">frame_timer</span> <span class="o">+</span> <span class="n">duration</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="n">frame_queue_next</span><span class="p">(</span><span class="o">&amp;</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">pictq</span><span class="p">);</span>
+                    <span class="k">goto</span> <span class="n">retry</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">subtitle_st</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">while</span> <span class="p">(</span><span class="n">frame_queue_nb_remaining</span><span class="p">(</span><span class="o">&amp;</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">subpq</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="n">sp</span> <span class="o">=</span> <span class="n">frame_queue_peek</span><span class="p">(</span><span class="o">&amp;</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">subpq</span><span class="p">);</span>
+
+                    <span class="k">if</span> <span class="p">(</span><span class="n">frame_queue_nb_remaining</span><span class="p">(</span><span class="o">&amp;</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">subpq</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
+                        <span class="n">sp2</span> <span class="o">=</span> <span class="n">frame_queue_peek_next</span><span class="p">(</span><span class="o">&amp;</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">subpq</span><span class="p">);</span>
+                    <span class="k">else</span>
+                        <span class="n">sp2</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+
+                    <span class="k">if</span> <span class="p">(</span><span class="n">sp</span><span class="o">-&gt;</span><span class="n">serial</span> <span class="o">!=</span> <span class="n">is</span><span class="o">-&gt;</span><span class="n">subtitleq</span><span class="p">.</span><span class="n">serial</span>
+                            <span class="o">||</span> <span class="p">(</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">vidclk</span><span class="p">.</span><span class="n">pts</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">sp</span><span class="o">-&gt;</span><span class="n">pts</span> <span class="o">+</span> <span class="p">((</span><span class="kt">float</span><span class="p">)</span> <span class="n">sp</span><span class="o">-&gt;</span><span class="n">sub</span><span class="p">.</span><span class="n">end_display_time</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)))</span>
+                            <span class="o">||</span> <span class="p">(</span><span class="n">sp2</span> <span class="o">&amp;&amp;</span> <span class="n">is</span><span class="o">-&gt;</span><span class="n">vidclk</span><span class="p">.</span><span class="n">pts</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">sp2</span><span class="o">-&gt;</span><span class="n">pts</span> <span class="o">+</span> <span class="p">((</span><span class="kt">float</span><span class="p">)</span> <span class="n">sp2</span><span class="o">-&gt;</span><span class="n">sub</span><span class="p">.</span><span class="n">start_display_time</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">))))</span>
+                    <span class="p">{</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">sp</span><span class="o">-&gt;</span><span class="n">uploaded</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="n">ffp_notify_msg4</span><span class="p">(</span><span class="n">ffp</span><span class="p">,</span> <span class="n">FFP_MSG_TIMED_TEXT</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">""</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+                        <span class="p">}</span>
+                        <span class="n">frame_queue_next</span><span class="p">(</span><span class="o">&amp;</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">subpq</span><span class="p">);</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                        <span class="k">break</span><span class="p">;</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+
+            <span class="n">frame_queue_next</span><span class="p">(</span><span class="o">&amp;</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">pictq</span><span class="p">);</span>
+            <span class="n">is</span><span class="o">-&gt;</span><span class="n">force_refresh</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+
+            <span class="n">SDL_LockMutex</span><span class="p">(</span><span class="n">ffp</span><span class="o">-&gt;</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">play_mutex</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">step</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">is</span><span class="o">-&gt;</span><span class="n">step</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">paused</span><span class="p">)</span>
+                    <span class="n">stream_update_pause_l</span><span class="p">(</span><span class="n">ffp</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="n">SDL_UnlockMutex</span><span class="p">(</span><span class="n">ffp</span><span class="o">-&gt;</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">play_mutex</span><span class="p">);</span>
+        <span class="p">}</span>
+<span class="nl">display:</span>
+        <span class="cm">/* display picture */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">ffp</span><span class="o">-&gt;</span><span class="n">display_disable</span> <span class="o">&amp;&amp;</span> <span class="n">is</span><span class="o">-&gt;</span><span class="n">force_refresh</span> <span class="o">&amp;&amp;</span> <span class="n">is</span><span class="o">-&gt;</span><span class="n">show_mode</span> <span class="o">==</span> <span class="n">SHOW_MODE_VIDEO</span> <span class="o">&amp;&amp;</span> <span class="n">is</span><span class="o">-&gt;</span><span class="n">pictq</span><span class="p">.</span><span class="n">rindex_shown</span><span class="p">)</span>
+            <span class="n">video_display2</span><span class="p">(</span><span class="n">ffp</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">is</span><span class="o">-&gt;</span><span class="n">force_refresh</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">ffp</span><span class="o">-&gt;</span><span class="n">show_status</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">static</span> <span class="kt">int64_t</span> <span class="n">last_time</span><span class="p">;</span>
+        <span class="kt">int64_t</span> <span class="n">cur_time</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">aqsize</span><span class="p">,</span> <span class="n">vqsize</span><span class="p">,</span> <span class="n">sqsize</span> <span class="n">__unused</span><span class="p">;</span>
+        <span class="kt">double</span> <span class="n">av_diff</span><span class="p">;</span>
+
+        <span class="n">cur_time</span> <span class="o">=</span> <span class="n">av_gettime_relative</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">last_time</span> <span class="o">||</span> <span class="p">(</span><span class="n">cur_time</span> <span class="o">-</span> <span class="n">last_time</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">30000</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">aqsize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="n">vqsize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="n">sqsize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">audio_st</span><span class="p">)</span>
+                <span class="n">aqsize</span> <span class="o">=</span> <span class="n">is</span><span class="o">-&gt;</span><span class="n">audioq</span><span class="p">.</span><span class="n">size</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">video_st</span><span class="p">)</span>
+                <span class="n">vqsize</span> <span class="o">=</span> <span class="n">is</span><span class="o">-&gt;</span><span class="n">videoq</span><span class="p">.</span><span class="n">size</span><span class="p">;</span>
+<span class="cp">#ifdef FFP_MERGE
+</span>            <span class="k">if</span> <span class="p">(</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">subtitle_st</span><span class="p">)</span>
+                <span class="n">sqsize</span> <span class="o">=</span> <span class="n">is</span><span class="o">-&gt;</span><span class="n">subtitleq</span><span class="p">.</span><span class="n">size</span><span class="p">;</span>
+<span class="cp">#else
+</span>            <span class="n">sqsize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="cp">#endif
+</span>            <span class="n">av_diff</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">audio_st</span> <span class="o">&amp;&amp;</span> <span class="n">is</span><span class="o">-&gt;</span><span class="n">video_st</span><span class="p">)</span>
+                <span class="n">av_diff</span> <span class="o">=</span> <span class="n">get_clock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">audclk</span><span class="p">)</span> <span class="o">-</span> <span class="n">get_clock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">vidclk</span><span class="p">);</span>
+            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">video_st</span><span class="p">)</span>
+                <span class="n">av_diff</span> <span class="o">=</span> <span class="n">get_master_clock</span><span class="p">(</span><span class="n">is</span><span class="p">)</span> <span class="o">-</span> <span class="n">get_clock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">vidclk</span><span class="p">);</span>
+            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">audio_st</span><span class="p">)</span>
+                <span class="n">av_diff</span> <span class="o">=</span> <span class="n">get_master_clock</span><span class="p">(</span><span class="n">is</span><span class="p">)</span> <span class="o">-</span> <span class="n">get_clock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">audclk</span><span class="p">);</span>
+            <span class="n">av_log</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">AV_LOG_INFO</span><span class="p">,</span>
+                   <span class="s">"%7.2f %s:%7.3f fd=%4d aq=%5dKB vq=%5dKB sq=%5dB f=%"</span><span class="n">PRId64</span><span class="s">"/%"</span><span class="n">PRId64</span><span class="s">"   </span><span class="se">\r</span><span class="s">"</span><span class="p">,</span>
+                   <span class="n">get_master_clock</span><span class="p">(</span><span class="n">is</span><span class="p">),</span>
+                   <span class="p">(</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">audio_st</span> <span class="o">&amp;&amp;</span> <span class="n">is</span><span class="o">-&gt;</span><span class="n">video_st</span><span class="p">)</span> <span class="o">?</span> <span class="s">"A-V"</span> <span class="o">:</span> <span class="p">(</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">video_st</span> <span class="o">?</span> <span class="s">"M-V"</span> <span class="o">:</span> <span class="p">(</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">audio_st</span> <span class="o">?</span> <span class="s">"M-A"</span> <span class="o">:</span> <span class="s">"   "</span><span class="p">)),</span>
+                   <span class="n">av_diff</span><span class="p">,</span>
+                   <span class="n">is</span><span class="o">-&gt;</span><span class="n">frame_drops_early</span> <span class="o">+</span> <span class="n">is</span><span class="o">-&gt;</span><span class="n">frame_drops_late</span><span class="p">,</span>
+                   <span class="n">aqsize</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">,</span>
+                   <span class="n">vqsize</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">,</span>
+                   <span class="n">sqsize</span><span class="p">,</span>
+                   <span class="n">is</span><span class="o">-&gt;</span><span class="n">video_st</span> <span class="o">?</span> <span class="n">is</span><span class="o">-&gt;</span><span class="n">viddec</span><span class="p">.</span><span class="n">avctx</span><span class="o">-&gt;</span><span class="n">pts_correction_num_faulty_dts</span> <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+                   <span class="n">is</span><span class="o">-&gt;</span><span class="n">video_st</span> <span class="o">?</span> <span class="n">is</span><span class="o">-&gt;</span><span class="n">viddec</span><span class="p">.</span><span class="n">avctx</span><span class="o">-&gt;</span><span class="n">pts_correction_num_faulty_pts</span> <span class="o">:</span> <span class="mi">0</span><span class="p">);</span>
+            <span class="n">fflush</span><span class="p">(</span><span class="n">stdout</span><span class="p">);</span>
+            <span class="n">last_time</span> <span class="o">=</span> <span class="n">cur_time</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>相关的数据结构参考我的上面两篇文章</li>
+  <li><a href="https://blog.lxfpoe.work/jekyll/update/2020/09/19/ijkplayer05.html">IikPlayer frame queue分析</a></li>
+  <li>
+    <p><a href="https://blog.lxfpoe.work/jekyll/update/2020/09/19/ijkplayer04.html">IikPlayer packet queue分析</a></p>
+  </li>
+  <li>主要计算音视频时间的方法<code class="language-plaintext highlighter-rouge">ff_ffplay.c#1253/compute_target_delay</code></li>
+</ul>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="c1">//计算合适的延迟时间. </span>
+<span class="c1">//时钟同步，主要的视频同步到音频做的追赶和等待逻辑. </span>
+<span class="k">static</span> <span class="kt">double</span> <span class="nf">compute_target_delay</span><span class="p">(</span><span class="n">FFPlayer</span> <span class="o">*</span><span class="n">ffp</span><span class="p">,</span> <span class="kt">double</span> <span class="n">delay</span><span class="p">,</span> <span class="n">VideoState</span> <span class="o">*</span><span class="n">is</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">double</span> <span class="n">sync_threshold</span><span class="p">,</span> <span class="n">diff</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+    <span class="cm">/* update delay to follow master synchronisation source */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">get_master_sync_type</span><span class="p">(</span><span class="n">is</span><span class="p">)</span> <span class="o">!=</span> <span class="n">AV_SYNC_VIDEO_MASTER</span><span class="p">)</span> <span class="p">{</span>
+        <span class="cm">/* if video is slave, we try to correct big delays by
+           duplicating or deleting a frame */</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">get_clock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">is</span><span class="o">-&gt;</span><span class="n">vidclk</span><span class="p">)</span> <span class="o">-</span> <span class="n">get_master_clock</span><span class="p">(</span><span class="n">is</span><span class="p">);</span>
+
+        <span class="cm">/* skip or repeat frame. We take into account the
+           delay to compute the threshold. I still don't know
+           if it is the best guess */</span>
+        <span class="n">sync_threshold</span> <span class="o">=</span> <span class="n">FFMAX</span><span class="p">(</span><span class="n">AV_SYNC_THRESHOLD_MIN</span><span class="p">,</span> <span class="n">FFMIN</span><span class="p">(</span><span class="n">AV_SYNC_THRESHOLD_MAX</span><span class="p">,</span> <span class="n">delay</span><span class="p">));</span>
+        <span class="cm">/* -- by bbcallen: replace is-&gt;max_frame_duration with AV_NOSYNC_THRESHOLD */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isnan</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">fabs</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">AV_NOSYNC_THRESHOLD</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">diff</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="n">sync_threshold</span><span class="p">)</span>
+                <span class="n">delay</span> <span class="o">=</span> <span class="n">FFMAX</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">delay</span> <span class="o">+</span> <span class="n">diff</span><span class="p">);</span>
+            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">diff</span> <span class="o">&gt;=</span> <span class="n">sync_threshold</span> <span class="o">&amp;&amp;</span> <span class="n">delay</span> <span class="o">&gt;</span> <span class="n">AV_SYNC_FRAMEDUP_THRESHOLD</span><span class="p">)</span>
+                <span class="n">delay</span> <span class="o">=</span> <span class="n">delay</span> <span class="o">+</span> <span class="n">diff</span><span class="p">;</span>
+            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">diff</span> <span class="o">&gt;=</span> <span class="n">sync_threshold</span><span class="p">)</span>
+                <span class="n">delay</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">delay</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">ffp</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">ffp</span><span class="o">-&gt;</span><span class="n">stat</span><span class="p">.</span><span class="n">avdelay</span> <span class="o">=</span> <span class="n">delay</span><span class="p">;</span>
+        <span class="n">ffp</span><span class="o">-&gt;</span><span class="n">stat</span><span class="p">.</span><span class="n">avdiff</span>  <span class="o">=</span> <span class="n">diff</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="cp">#ifdef FFP_SHOW_AUDIO_DELAY
+</span>    <span class="n">av_log</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">AV_LOG_TRACE</span><span class="p">,</span> <span class="s">"video: delay=%0.3f A-V=%f</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span>
+            <span class="n">delay</span><span class="p">,</span> <span class="o">-</span><span class="n">diff</span><span class="p">);</span>
+<span class="cp">#endif
+</span>
+    <span class="k">return</span> <span class="n">delay</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>跟增同步类型看到在初始化的时候. 默认设置了同步到音频.</li>
+  <li><code class="language-plaintext highlighter-rouge">ijkmedia/ijkplayer/ff_ffplay_def.h#733#ffp_reset_internal</code></li>
+</ul>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">inline</span> <span class="k">static</span> <span class="kt">void</span> <span class="nf">ffp_reset_internal</span><span class="p">(</span><span class="n">FFPlayer</span> <span class="o">*</span><span class="n">ffp</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="cm">/* ffp-&gt;is closed in stream_close() */</span>
+    <span class="n">av_opt_free</span><span class="p">(</span><span class="n">ffp</span><span class="p">);</span>
+
+    <span class="cm">/* format/codec options */</span>
+    <span class="n">av_dict_free</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ffp</span><span class="o">-&gt;</span><span class="n">format_opts</span><span class="p">);</span>
+    <span class="n">av_dict_free</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ffp</span><span class="o">-&gt;</span><span class="n">codec_opts</span><span class="p">);</span>
+    <span class="n">av_dict_free</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ffp</span><span class="o">-&gt;</span><span class="n">sws_dict</span><span class="p">);</span>
+    <span class="n">av_dict_free</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ffp</span><span class="o">-&gt;</span><span class="n">player_opts</span><span class="p">);</span>
+    <span class="n">av_dict_free</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ffp</span><span class="o">-&gt;</span><span class="n">swr_opts</span><span class="p">);</span>
+    <span class="n">av_dict_free</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ffp</span><span class="o">-&gt;</span><span class="n">swr_preset_opts</span><span class="p">);</span>
+
+    <span class="cm">/* ffplay options specified by the user */</span>
+    <span class="n">av_freep</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ffp</span><span class="o">-&gt;</span><span class="n">input_filename</span><span class="p">);</span>
+    <span class="n">ffp</span><span class="o">-&gt;</span><span class="n">audio_disable</span>          <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">ffp</span><span class="o">-&gt;</span><span class="n">video_disable</span>          <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">memset</span><span class="p">(</span><span class="n">ffp</span><span class="o">-&gt;</span><span class="n">wanted_stream_spec</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ffp</span><span class="o">-&gt;</span><span class="n">wanted_stream_spec</span><span class="p">));</span>
+    <span class="n">ffp</span><span class="o">-&gt;</span><span class="n">seek_by_bytes</span>          <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="n">ffp</span><span class="o">-&gt;</span><span class="n">display_disable</span>        <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">ffp</span><span class="o">-&gt;</span><span class="n">show_status</span>            <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+	<span class="c1">//初始化音视频同步方案.默认同步到音频. </span>
+    <span class="n">ffp</span><span class="o">-&gt;</span><span class="n">av_sync_type</span>           <span class="o">=</span> <span class="n">AV_SYNC_AUDIO_MASTER</span><span class="p">;</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>修改jni方法中的同步类型<code class="language-plaintext highlighter-rouge">IjkMediaPlayer_setZeroDelay</code></li>
+</ul>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">+</span> <span class="err">#</span><span class="n">include</span> <span class="s">"../ff_ffplay_def.h"</span>
+
+<span class="cm">/**
+* 0延时开关. 
+*@delayOpen  0:关闭 1：开启 默认关闭. 
+*/</span>
+<span class="k">static</span> <span class="kt">void</span>
+<span class="nf">IjkMediaPlayer_setZeroDelay</span><span class="p">(</span><span class="n">JNIEnv</span> <span class="o">*</span><span class="n">env</span><span class="p">,</span> <span class="n">jobject</span> <span class="n">thiz</span><span class="p">,</span> <span class="n">jint</span> <span class="n">delayOpen</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">MPTRACE</span><span class="p">(</span><span class="s">"%s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">__func__</span><span class="p">);</span>
+    <span class="n">IjkMediaPlayer</span> <span class="o">*</span><span class="n">mp</span> <span class="o">=</span> <span class="n">jni_get_media_player</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">thiz</span><span class="p">);</span>
+    <span class="c1">//给mediaplayer赋值. </span>
+    <span class="n">mp</span><span class="o">-&gt;</span><span class="n">ffplayer</span><span class="o">-&gt;</span><span class="n">delay_forbidden</span> <span class="o">=</span> <span class="n">delayOpen</span><span class="p">;</span>
+<span class="o">+</span>    <span class="c1">//如果打开0延迟则设置视频为主同步</span>
+<span class="o">+</span>    <span class="k">if</span><span class="p">(</span><span class="n">delayOpen</span><span class="p">){</span>
+<span class="o">+</span>      <span class="n">mp</span><span class="o">-&gt;</span><span class="n">ffplayer</span><span class="o">-&gt;</span><span class="n">av_sync_type</span>  <span class="o">=</span> <span class="n">AV_SYNC_VIDEO_MASTER</span><span class="p">;</span> 
+<span class="o">+</span>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+<span class="o">+</span>      <span class="n">mp</span><span class="o">-&gt;</span><span class="n">ffplayer</span><span class="o">-&gt;</span><span class="n">av_sync_type</span>	<span class="o">=</span> <span class="n">AV_SYNC_AUDIO_MASTER</span><span class="p">;</span> 
+<span class="o">+</span>    <span class="p">}</span>
+	
+    <span class="n">ijkmp_dec_ref_p</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mp</span><span class="p">);</span>
+<span class="p">}</span>
+
+</code></pre></div></div>
+<ul>
+  <li>重新编译ijkplayer(这里只有ijk的代码修改了，不需要重新编译ffmpeg和openssl)</li>
+</ul>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~/develop/caixingming/ijkplayer-android/android<span class="nv">$ </span>./compile-ijk.sh all
+
+</code></pre></div></div>
+
+<ul>
+  <li>修改<code class="language-plaintext highlighter-rouge">IjkMediaPlayer.java</code></li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     <span class="cm">/**
+      * 设置是否开启延时开关，ptz需要0延迟
+      * 0： 关闭 default
+      * 1:  开启0延迟video，音频会延迟2s,待解决.
+      * @param delayOpen
+      */</span>
+      <span class="kd">private</span> <span class="kd">native</span> <span class="kt">void</span> <span class="nf">_setZeroDelay</span><span class="o">(</span><span class="kt">int</span> <span class="n">delayOpen</span><span class="o">);</span>
+    
+     <span class="cm">/**
+     * 是否开启视频0延迟开关.
+     * @param isOpen  true：开启0延迟 ptz控制会达到0延迟 默认关闭：false.
+     */</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setVideoZeroDelay</span><span class="o">(</span><span class="kt">boolean</span> <span class="n">isOpen</span><span class="o">){</span>
+        <span class="n">_setZeroDelay</span><span class="o">(</span><span class="n">isOpen</span><span class="o">?</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="o">);</span>
+    <span class="o">}</span>   
+</code></pre></div></div>
+
+<ul>
+  <li>修改<code class="language-plaintext highlighter-rouge">IjkVideoView.java</code></li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+  <span class="kd">private</span> <span class="kt">boolean</span> <span class="n">isVideoZeroDelay</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+  
+    <span class="cm">/**
+     * @param isOpen true:打开0延迟  false :关闭.
+     */</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">openZeroVideoDelay</span><span class="o">(</span><span class="kt">boolean</span> <span class="n">isOpen</span><span class="o">){</span>
+        <span class="nc">Log</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="no">TAG</span><span class="o">,</span> <span class="s">"openZeroVideoDelay  ~"</span><span class="o">+</span><span class="n">isOpen</span><span class="o">);</span>
+        <span class="n">isVideoZeroDelay</span> <span class="o">=</span> <span class="n">isOpen</span><span class="o">;</span>
+        <span class="k">if</span><span class="o">(</span><span class="n">mMediaPlayer</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">){</span>
+            <span class="k">if</span><span class="o">(</span><span class="n">mMediaPlayer</span> <span class="k">instanceof</span> <span class="nc">IjkMediaPlayer</span><span class="o">){</span>
+                <span class="nc">Log</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="no">TAG</span><span class="o">,</span> <span class="s">"openZeroVideoDelay#setVideoZeroDelay \n"</span><span class="o">);</span>
+                <span class="o">((</span><span class="nc">IjkMediaPlayer</span><span class="o">)</span><span class="n">mMediaPlayer</span><span class="o">).</span><span class="na">setVideoZeroDelay</span><span class="o">(</span><span class="n">isVideoZeroDelay</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">}</span><span class="k">else</span><span class="o">{</span>
+            <span class="nc">Log</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="no">TAG</span><span class="o">,</span> <span class="s">"openZeroVideoDelay  ~mMediaPlayer "</span><span class="o">+</span><span class="n">mMediaPlayer</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+    
+    <span class="kd">public</span> <span class="nc">IMediaPlayer</span> <span class="nf">createPlayer</span><span class="o">(</span><span class="kt">int</span> <span class="n">playerType</span> <span class="o">,</span><span class="kt">int</span> <span class="n">url_type</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Log</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="no">TAG</span><span class="o">,</span><span class="s">"createPlayer~url_type"</span><span class="o">+</span><span class="n">url_type</span><span class="o">+</span><span class="s">" playerType"</span><span class="o">+</span><span class="n">playerType</span><span class="o">);</span>
+        <span class="nc">IMediaPlayer</span> <span class="n">mediaPlayer</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+
+        <span class="k">switch</span> <span class="o">(</span><span class="n">playerType</span><span class="o">)</span> <span class="o">{</span>
+        <span class="o">...</span>
+        <span class="k">default</span><span class="o">:</span> <span class="o">{</span>
+                <span class="nc">IjkMediaPlayer</span> <span class="n">ijkMediaPlayer</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">mUri</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">ijkMediaPlayer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">IjkMediaPlayer</span><span class="o">();</span>
+                    <span class="n">ijkMediaPlayer</span><span class="o">.</span><span class="na">native_setLogLevel</span><span class="o">(</span><span class="n">mLogLevel</span><span class="o">);</span>
+                    <span class="nc">Log</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="no">TAG</span><span class="o">,</span><span class="s">"create mediaplayer#setVideoZeroDelay!~"</span><span class="o">+</span><span class="n">isVideoZeroDelay</span><span class="o">);</span>
+                    <span class="n">ijkMediaPlayer</span><span class="o">.</span><span class="na">setVideoZeroDelay</span><span class="o">(</span><span class="n">isVideoZeroDelay</span><span class="o">);</span>
+                    <span class="c1">//ijk不支持rtmp设置超时，原因是ffmpeg的问题 .</span>
+                <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>使用</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//打开视频0延迟.</span>
+        <span class="n">mVideoView</span><span class="o">.</span><span class="na">openZeroVideoDelay</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+        <span class="c1">// prefer mVideoPath</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">mVideoPath</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span>
+            <span class="n">mVideoView</span><span class="o">.</span><span class="na">setVideoPath</span><span class="o">(</span><span class="n">mVideoPath</span><span class="o">,</span> <span class="nc">IjkVideoView</span><span class="o">.</span><span class="na">IJK_TYPE_LIVING_WATCH</span><span class="o">);</span>
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p>具体代码可以看项目<a href="https://github.com/jdpxiaoming/ijkrtspdemo">ijkrtspdemo</a></p>
+  </li>
+  <li>
+    <p>友联 &amp; 相关开源项目源码出处.</p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/PPlayer">GitHub - jdpxiaoming/PPlayer: ffmpeg 4.0.2静态库从0开始一个播放器的搭建，支持rtmp、rtsp、hls、本地MP4文件播放，音视频同步，直播推流</a></p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/ijkrtspdemo">GitHub - jdpxiaoming/ijkrtspdemo: ijkplayer open the rtsp &amp; h265 surpport android demo .</a></p>
+  </li>
+  <li>
+    <p><a href="https://github.com/jdpxiaoming/FFmpegTools/">GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.</a></p>
+  </li>
+</ul>
+
+
+  </div><a class="u-url" href="/jekyll/update/2020/09/19/ijkplayer07.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">poe Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">poe Blog</li><li><a class="u-email" href="mailto:302940116@qq.com">302940116@qq.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">jdpxiaoming</span></a></li><li><a href="https://www.twitter.com/jdpxiaoming"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">jdpxiaoming</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>不积跬步无以至千里，先从一篇blog出发， 归纳总结出一个多媒体安卓工程师的技术轨迹。</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
