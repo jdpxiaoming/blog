@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.7">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-09-19T15:48:56+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">poe Blog</title><subtitle>不积跬步无以至千里，先从一篇blog出发， 归纳总结出一个多媒体安卓工程师的技术轨迹。</subtitle><entry><title type="html">ijkplayer开启视频同步</title><link href="http://localhost:4000/jekyll/update/2020/09/19/ijkplayer07.html" rel="alternate" type="text/html" title="ijkplayer开启视频同步" /><published>2020-09-19T14:27:01+08:00</published><updated>2020-09-19T14:27:01+08:00</updated><id>http://localhost:4000/jekyll/update/2020/09/19/ijkplayer07</id><content type="html" xml:base="http://localhost:4000/jekyll/update/2020/09/19/ijkplayer07.html">&lt;h1 id=&quot;ijkplayer开启视频同步&quot;&gt;ijkplayer开启视频同步&lt;/h1&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.7">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2020-09-19T15:57:30+08:00</updated><id>/feed.xml</id><title type="html">poe Blog</title><subtitle>不积跬步无以至千里，先从一篇blog出发， 归纳总结出一个多媒体安卓工程师的技术轨迹。</subtitle><entry><title type="html">ijkplayer开启视频同步</title><link href="/jekyll/update/2020/09/19/ijkplayer07.html" rel="alternate" type="text/html" title="ijkplayer开启视频同步" /><published>2020-09-19T14:27:01+08:00</published><updated>2020-09-19T14:27:01+08:00</updated><id>/jekyll/update/2020/09/19/ijkplayer07</id><content type="html" xml:base="/jekyll/update/2020/09/19/ijkplayer07.html">&lt;h1 id=&quot;ijkplayer开启视频同步&quot;&gt;ijkplayer开启视频同步&lt;/h1&gt;
 
 &lt;ul&gt;
   &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ijkmedia/ijkplayer/ff_ffplay.c#1320&lt;/code&gt;&lt;/li&gt;
@@ -381,7 +381,7 @@
   &lt;li&gt;
     &lt;p&gt;&lt;a href=&quot;https://github.com/jdpxiaoming/FFmpegTools/&quot;&gt;GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.&lt;/a&gt;&lt;/p&gt;
   &lt;/li&gt;
-&lt;/ul&gt;</content><author><name></name></author><summary type="html">ijkplayer开启视频同步</summary></entry><entry><title type="html">ijkplayer播放flv延时优化0延时20200825</title><link href="http://localhost:4000/jekyll/update/2020/09/19/ijkplayer06.html" rel="alternate" type="text/html" title="ijkplayer播放flv延时优化0延时20200825" /><published>2020-09-19T13:27:01+08:00</published><updated>2020-09-19T13:27:01+08:00</updated><id>http://localhost:4000/jekyll/update/2020/09/19/ijkplayer06</id><content type="html" xml:base="http://localhost:4000/jekyll/update/2020/09/19/ijkplayer06.html">&lt;h1 id=&quot;ijkplayer播放flv延时优化0延时20200825&quot;&gt;ijkplayer播放flv延时优化0延时20200825&lt;/h1&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">ijkplayer开启视频同步</summary></entry><entry><title type="html">ijkplayer播放flv延时优化0延时20200825</title><link href="/jekyll/update/2020/09/19/ijkplayer06.html" rel="alternate" type="text/html" title="ijkplayer播放flv延时优化0延时20200825" /><published>2020-09-19T13:27:01+08:00</published><updated>2020-09-19T13:27:01+08:00</updated><id>/jekyll/update/2020/09/19/ijkplayer06</id><content type="html" xml:base="/jekyll/update/2020/09/19/ijkplayer06.html">&lt;h1 id=&quot;ijkplayer播放flv延时优化0延时20200825&quot;&gt;ijkplayer播放flv延时优化0延时20200825&lt;/h1&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;ios和android的直播参数调整的完全一致，但是安卓就是有2s的flv直播延时无法消除. 
@@ -1185,7 +1185,7 @@
   &lt;li&gt;
     &lt;p&gt;&lt;a href=&quot;https://github.com/jdpxiaoming/FFmpegTools/&quot;&gt;GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.&lt;/a&gt;&lt;/p&gt;
   &lt;/li&gt;
-&lt;/ul&gt;</content><author><name></name></author><summary type="html">ijkplayer播放flv延时优化0延时20200825</summary></entry><entry><title type="html">(转)IikPlayer frame queue分析</title><link href="http://localhost:4000/jekyll/update/2020/09/19/ijkplayer05.html" rel="alternate" type="text/html" title="(转)IikPlayer frame queue分析" /><published>2020-09-19T12:27:01+08:00</published><updated>2020-09-19T12:27:01+08:00</updated><id>http://localhost:4000/jekyll/update/2020/09/19/ijkplayer05</id><content type="html" xml:base="http://localhost:4000/jekyll/update/2020/09/19/ijkplayer05.html">&lt;h1 id=&quot;ffplay-frame-queue分析&quot;&gt;ffplay frame queue分析&lt;/h1&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">ijkplayer播放flv延时优化0延时20200825</summary></entry><entry><title type="html">(转)IikPlayer frame queue分析</title><link href="/jekyll/update/2020/09/19/ijkplayer05.html" rel="alternate" type="text/html" title="(转)IikPlayer frame queue分析" /><published>2020-09-19T12:27:01+08:00</published><updated>2020-09-19T12:27:01+08:00</updated><id>/jekyll/update/2020/09/19/ijkplayer05</id><content type="html" xml:base="/jekyll/update/2020/09/19/ijkplayer05.html">&lt;h1 id=&quot;ffplay-frame-queue分析&quot;&gt;ffplay frame queue分析&lt;/h1&gt;
 
 &lt;p&gt;出处：&lt;a href=&quot;https://zhuanlan.zhihu.com/p/43564980&quot;&gt;ffplay frame queue分析 - 知乎&lt;/a&gt;&lt;/p&gt;
 
@@ -1531,7 +1531,7 @@ else
   &lt;li&gt;
     &lt;p&gt;&lt;a href=&quot;https://github.com/jdpxiaoming/FFmpegTools/&quot;&gt;GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.&lt;/a&gt;&lt;/p&gt;
   &lt;/li&gt;
-&lt;/ul&gt;</content><author><name></name></author><summary type="html">ffplay frame queue分析</summary></entry><entry><title type="html">(转)IikPlayer packet queue分析</title><link href="http://localhost:4000/jekyll/update/2020/09/19/ijkplayer04.html" rel="alternate" type="text/html" title="(转)IikPlayer packet queue分析" /><published>2020-09-19T10:27:01+08:00</published><updated>2020-09-19T10:27:01+08:00</updated><id>http://localhost:4000/jekyll/update/2020/09/19/ijkplayer04</id><content type="html" xml:base="http://localhost:4000/jekyll/update/2020/09/19/ijkplayer04.html">&lt;h1 id=&quot;ffplay-packet-queue分析&quot;&gt;ffplay packet queue分析&lt;/h1&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">ffplay frame queue分析</summary></entry><entry><title type="html">(转)IikPlayer packet queue分析</title><link href="/jekyll/update/2020/09/19/ijkplayer04.html" rel="alternate" type="text/html" title="(转)IikPlayer packet queue分析" /><published>2020-09-19T10:27:01+08:00</published><updated>2020-09-19T10:27:01+08:00</updated><id>/jekyll/update/2020/09/19/ijkplayer04</id><content type="html" xml:base="/jekyll/update/2020/09/19/ijkplayer04.html">&lt;h1 id=&quot;ffplay-packet-queue分析&quot;&gt;ffplay packet queue分析&lt;/h1&gt;
 
 &lt;ul&gt;
   &lt;li&gt;转载自:&lt;a href=&quot;https://zhuanlan.zhihu.com/p/43295650&quot;&gt;ffplay packet queue分析 - 知乎&lt;/a&gt;&lt;/li&gt;
@@ -1826,7 +1826,7 @@ serial字段主要用于标记当前节点的序列号，ffplay中多处用到se
   &lt;li&gt;
     &lt;p&gt;&lt;a href=&quot;https://github.com/jdpxiaoming/FFmpegTools/&quot;&gt;GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.&lt;/a&gt;&lt;/p&gt;
   &lt;/li&gt;
-&lt;/ul&gt;</content><author><name></name></author><summary type="html">ffplay packet queue分析</summary></entry><entry><title type="html">多线程(三) CAS的原理</title><link href="http://localhost:4000/jekyll/update/2020/07/12/multi-thread03.html" rel="alternate" type="text/html" title="多线程(三) CAS的原理" /><published>2020-07-12T16:50:01+08:00</published><updated>2020-07-12T16:50:01+08:00</updated><id>http://localhost:4000/jekyll/update/2020/07/12/multi-thread03</id><content type="html" xml:base="http://localhost:4000/jekyll/update/2020/07/12/multi-thread03.html">&lt;h1 id=&quot;多线程三-cas的原理&quot;&gt;多线程(三) CAS的原理&lt;/h1&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">ffplay packet queue分析</summary></entry><entry><title type="html">多线程(三) CAS的原理</title><link href="/jekyll/update/2020/07/12/multi-thread03.html" rel="alternate" type="text/html" title="多线程(三) CAS的原理" /><published>2020-07-12T16:50:01+08:00</published><updated>2020-07-12T16:50:01+08:00</updated><id>/jekyll/update/2020/07/12/multi-thread03</id><content type="html" xml:base="/jekyll/update/2020/07/12/multi-thread03.html">&lt;h1 id=&quot;多线程三-cas的原理&quot;&gt;多线程(三) CAS的原理&lt;/h1&gt;
 
 &lt;h1 id=&quot;cas&quot;&gt;CAS&lt;/h1&gt;
 
@@ -2311,7 +2311,7 @@ new Object () - &amp;gt; 101 偏向锁 -&amp;gt;线程ID为0 -&amp;gt; Anonymous
   &lt;li&gt;
     &lt;p&gt;&lt;a href=&quot;https://github.com/jdpxiaoming/FFmpegTools/&quot;&gt;GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.&lt;/a&gt;&lt;/p&gt;
   &lt;/li&gt;
-&lt;/ul&gt;</content><author><name></name></author><summary type="html">多线程(三) CAS的原理</summary></entry><entry><title type="html">多线程(二) volatile的用途</title><link href="http://localhost:4000/jekyll/update/2020/07/11/multi-thread02.html" rel="alternate" type="text/html" title="多线程(二) volatile的用途" /><published>2020-07-11T16:50:01+08:00</published><updated>2020-07-11T16:50:01+08:00</updated><id>http://localhost:4000/jekyll/update/2020/07/11/multi-thread02</id><content type="html" xml:base="http://localhost:4000/jekyll/update/2020/07/11/multi-thread02.html">&lt;h1 id=&quot;多线程二-volatile的用途&quot;&gt;多线程(二) volatile的用途&lt;/h1&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">多线程(三) CAS的原理</summary></entry><entry><title type="html">多线程(二) volatile的用途</title><link href="/jekyll/update/2020/07/11/multi-thread02.html" rel="alternate" type="text/html" title="多线程(二) volatile的用途" /><published>2020-07-11T16:50:01+08:00</published><updated>2020-07-11T16:50:01+08:00</updated><id>/jekyll/update/2020/07/11/multi-thread02</id><content type="html" xml:base="/jekyll/update/2020/07/11/multi-thread02.html">&lt;h1 id=&quot;多线程二-volatile的用途&quot;&gt;多线程(二) volatile的用途&lt;/h1&gt;
 
 &lt;h1 id=&quot;volatile的用途&quot;&gt;volatile的用途&lt;/h1&gt;
 
@@ -2574,7 +2574,7 @@ CPU内部的4个字节的Buffer&lt;/p&gt;
   &lt;li&gt;
     &lt;p&gt;&lt;a href=&quot;https://github.com/jdpxiaoming/FFmpegTools/&quot;&gt;GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.&lt;/a&gt;&lt;/p&gt;
   &lt;/li&gt;
-&lt;/ul&gt;</content><author><name></name></author><summary type="html">多线程(二) volatile的用途</summary></entry><entry><title type="html">多线程(一)线程/进程/携程的基础知识</title><link href="http://localhost:4000/jekyll/update/2020/07/10/multi-thread01.html" rel="alternate" type="text/html" title="多线程(一)线程/进程/携程的基础知识" /><published>2020-07-10T16:50:01+08:00</published><updated>2020-07-10T16:50:01+08:00</updated><id>http://localhost:4000/jekyll/update/2020/07/10/multi-thread01</id><content type="html" xml:base="http://localhost:4000/jekyll/update/2020/07/10/multi-thread01.html">&lt;h1 id=&quot;多线程一线程进程携程的基础知识&quot;&gt;多线程(一)线程/进程/携程的基础知识&lt;/h1&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">多线程(二) volatile的用途</summary></entry><entry><title type="html">多线程(一)线程/进程/携程的基础知识</title><link href="/jekyll/update/2020/07/10/multi-thread01.html" rel="alternate" type="text/html" title="多线程(一)线程/进程/携程的基础知识" /><published>2020-07-10T16:50:01+08:00</published><updated>2020-07-10T16:50:01+08:00</updated><id>/jekyll/update/2020/07/10/multi-thread01</id><content type="html" xml:base="/jekyll/update/2020/07/10/multi-thread01.html">&lt;h1 id=&quot;多线程一线程进程携程的基础知识&quot;&gt;多线程(一)线程/进程/携程的基础知识&lt;/h1&gt;
 
 &lt;p&gt;&lt;img src=&quot;/assets/blog_res/1c55ba76.jpg&quot; alt=&quot;01_01.jpg&quot; /&gt;&lt;/p&gt;
 
@@ -3143,7 +3143,7 @@ CPU内部的4个字节的Buffer&lt;/p&gt;
   &lt;li&gt;
     &lt;p&gt;&lt;a href=&quot;https://github.com/jdpxiaoming/FFmpegTools/&quot;&gt;GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.&lt;/a&gt;&lt;/p&gt;
   &lt;/li&gt;
-&lt;/ul&gt;</content><author><name></name></author><summary type="html">多线程(一)线程/进程/携程的基础知识</summary></entry><entry><title type="html">GihubPage个人博客搭建2020/04/28成功.</title><link href="http://localhost:4000/jekyll/update/2020/07/04/blog.html" rel="alternate" type="text/html" title="GihubPage个人博客搭建2020/04/28成功. " /><published>2020-07-04T16:59:01+08:00</published><updated>2020-07-04T16:59:01+08:00</updated><id>http://localhost:4000/jekyll/update/2020/07/04/blog</id><content type="html" xml:base="http://localhost:4000/jekyll/update/2020/07/04/blog.html">&lt;h1 id=&quot;gihubpage个人博客搭建20200428成功&quot;&gt;GihubPage个人博客搭建2020/04/28成功.&lt;/h1&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">多线程(一)线程/进程/携程的基础知识</summary></entry><entry><title type="html">GihubPage个人博客搭建2020/04/28成功.</title><link href="/jekyll/update/2020/07/04/blog.html" rel="alternate" type="text/html" title="GihubPage个人博客搭建2020/04/28成功. " /><published>2020-07-04T16:59:01+08:00</published><updated>2020-07-04T16:59:01+08:00</updated><id>/jekyll/update/2020/07/04/blog</id><content type="html" xml:base="/jekyll/update/2020/07/04/blog.html">&lt;h1 id=&quot;gihubpage个人博客搭建20200428成功&quot;&gt;GihubPage个人博客搭建2020/04/28成功.&lt;/h1&gt;
 
 &lt;ul&gt;
   &lt;li&gt;依赖项目&lt;a href=&quot;https://jdpxiaoming.github.io/PPlayer/&quot;&gt;PPlayer&lt;/a&gt;&lt;/li&gt;
@@ -3297,7 +3297,7 @@ git push origin gh-pages
   &lt;li&gt;
     &lt;p&gt;&lt;a href=&quot;https://github.com/jdpxiaoming/FFmpegTools/&quot;&gt;GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.&lt;/a&gt;&lt;/p&gt;
   &lt;/li&gt;
-&lt;/ul&gt;</content><author><name></name></author><summary type="html">GihubPage个人博客搭建2020/04/28成功.</summary></entry><entry><title type="html">ijkplayer编译修改so名字</title><link href="http://localhost:4000/jekyll/update/2020/07/04/ijkplayer04.html" rel="alternate" type="text/html" title="ijkplayer编译修改so名字" /><published>2020-07-04T16:50:01+08:00</published><updated>2020-07-04T16:50:01+08:00</updated><id>http://localhost:4000/jekyll/update/2020/07/04/ijkplayer04</id><content type="html" xml:base="http://localhost:4000/jekyll/update/2020/07/04/ijkplayer04.html">&lt;h1 id=&quot;ijkplayer编译修改so名字&quot;&gt;ijkplayer编译修改so名字&lt;/h1&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">GihubPage个人博客搭建2020/04/28成功.</summary></entry><entry><title type="html">ijkplayer编译修改so名字</title><link href="/jekyll/update/2020/07/04/ijkplayer04.html" rel="alternate" type="text/html" title="ijkplayer编译修改so名字" /><published>2020-07-04T16:50:01+08:00</published><updated>2020-07-04T16:50:01+08:00</updated><id>/jekyll/update/2020/07/04/ijkplayer04</id><content type="html" xml:base="/jekyll/update/2020/07/04/ijkplayer04.html">&lt;h1 id=&quot;ijkplayer编译修改so名字&quot;&gt;ijkplayer编译修改so名字&lt;/h1&gt;
 
 &lt;ul&gt;
   &lt;li&gt;修改libijkffmepg-&amp;gt;libijkwdzffmpeg
@@ -3378,7 +3378,7 @@ include $&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;PREBUILT_SHARED_LIBRARY&l
   &lt;li&gt;
     &lt;p&gt;&lt;a href=&quot;https://github.com/jdpxiaoming/FFmpegTools/&quot;&gt;GitHub - jdpxiaoming/FFmpegTools: use ffmpege as the binary file use commands params to run main funcition , picture and videos acitons as you licke.&lt;/a&gt;&lt;/p&gt;
   &lt;/li&gt;
-&lt;/ul&gt;</content><author><name></name></author><summary type="html">ijkplayer编译修改so名字</summary></entry><entry><title type="html">Git常用语法</title><link href="http://localhost:4000/jekyll/update/2020/06/11/git-command.html" rel="alternate" type="text/html" title="Git常用语法" /><published>2020-06-11T21:10:01+08:00</published><updated>2020-06-11T21:10:01+08:00</updated><id>http://localhost:4000/jekyll/update/2020/06/11/git-command</id><content type="html" xml:base="http://localhost:4000/jekyll/update/2020/06/11/git-command.html">&lt;h1 id=&quot;git常用语法&quot;&gt;Git常用语法&lt;/h1&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">ijkplayer编译修改so名字</summary></entry><entry><title type="html">Git常用语法</title><link href="/jekyll/update/2020/06/11/git-command.html" rel="alternate" type="text/html" title="Git常用语法" /><published>2020-06-11T21:10:01+08:00</published><updated>2020-06-11T21:10:01+08:00</updated><id>/jekyll/update/2020/06/11/git-command</id><content type="html" xml:base="/jekyll/update/2020/06/11/git-command.html">&lt;h1 id=&quot;git常用语法&quot;&gt;Git常用语法&lt;/h1&gt;
 
 &lt;h1 id=&quot;修改远程地址库&quot;&gt;修改远程地址库&lt;/h1&gt;
 &lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;方法一
