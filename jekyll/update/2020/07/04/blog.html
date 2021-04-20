@@ -2,22 +2,24 @@
 <html lang="en"><head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
 <title>GihubPage个人博客搭建2020/04/28成功. | poe Blog</title>
-<meta name="generator" content="Jekyll v3.8.7" />
+<meta name="generator" content="Jekyll v3.9.0" />
 <meta property="og:title" content="GihubPage个人博客搭建2020/04/28成功." />
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="GihubPage个人博客搭建2020/04/28成功." />
 <meta property="og:description" content="GihubPage个人博客搭建2020/04/28成功." />
-<link rel="canonical" href="/jekyll/update/2020/07/04/blog.html" />
-<meta property="og:url" content="/jekyll/update/2020/07/04/blog.html" />
+<link rel="canonical" href="http://localhost:4000/jekyll/update/2020/07/04/blog.html" />
+<meta property="og:url" content="http://localhost:4000/jekyll/update/2020/07/04/blog.html" />
 <meta property="og:site_name" content="poe Blog" />
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2020-07-04T16:59:01+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="GihubPage个人博客搭建2020/04/28成功." />
 <script type="application/ld+json">
-{"@type":"BlogPosting","headline":"GihubPage个人博客搭建2020/04/28成功.","dateModified":"2020-07-04T16:59:01+08:00","datePublished":"2020-07-04T16:59:01+08:00","url":"/jekyll/update/2020/07/04/blog.html","mainEntityOfPage":{"@type":"WebPage","@id":"/jekyll/update/2020/07/04/blog.html"},"description":"GihubPage个人博客搭建2020/04/28成功.","@context":"https://schema.org"}</script>
+{"@type":"BlogPosting","headline":"GihubPage个人博客搭建2020/04/28成功.","dateModified":"2020-07-04T16:59:01+08:00","datePublished":"2020-07-04T16:59:01+08:00","url":"http://localhost:4000/jekyll/update/2020/07/04/blog.html","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/jekyll/update/2020/07/04/blog.html"},"description":"GihubPage个人博客搭建2020/04/28成功.","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
-<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="/feed.xml" title="poe Blog" /></head>
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="poe Blog" /></head>
 <body><header class="site-header" role="banner">
 
   <div class="wrapper"><a class="site-title" rel="author" href="/">poe Blog</a><nav class="site-nav">
@@ -108,11 +110,11 @@ bundle exec jekyll serve
 
 <h2 id="修改gemfile文件">修改Gemfile文件</h2>
 
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">source</span> <span class="dl">'</span><span class="s1">http://mirrors.aliyun.com/rubygems/</span><span class="dl">'</span> <span class="err">#</span> <span class="err">更改</span><span class="nx">gem</span><span class="err">源可能要设置环境变量</span>
-<span class="err">#</span> <span class="nx">gem</span> <span class="dl">"</span><span class="s2">jekyll</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">~&gt; 4.0.0</span><span class="dl">"</span><span class="err">#</span> <span class="err">注释掉这行</span>
-<span class="nx">gem</span> <span class="dl">'</span><span class="s1">github-pages</span><span class="dl">'</span><span class="p">,</span> <span class="nx">group</span><span class="p">:</span> <span class="p">:</span><span class="nx">jekyll_plugins</span> <span class="err">#</span> <span class="err">去掉这行的注释井号#</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">source</span> <span class="dl">'</span><span class="s1">http://mirrors.aliyun.com/rubygems/</span><span class="dl">'</span> <span class="err">#</span> <span class="nx">更改gem源可能要设置环境变量</span>
+<span class="err">#</span> <span class="nx">gem</span> <span class="dl">"</span><span class="s2">jekyll</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">~&gt; 4.0.0</span><span class="dl">"</span><span class="err">#</span> <span class="nx">注释掉这行</span>
+<span class="nx">gem</span> <span class="dl">'</span><span class="s1">github-pages</span><span class="dl">'</span><span class="p">,</span> <span class="nx">group</span><span class="p">:</span> <span class="p">:</span><span class="nx">jekyll_plugins</span> <span class="err">#</span> <span class="nx">去掉这行的注释井号</span><span class="err">#</span>
 
-<span class="err">#</span> <span class="err">更新</span><span class="nx">jekyll</span>
+<span class="err">#</span> <span class="nx">更新jekyll</span>
 <span class="nx">bundle</span> <span class="nx">update</span> 
 
 </code></pre></div></div>
